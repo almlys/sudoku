@@ -159,9 +159,9 @@ def solve(grid):
             continue
         if current.isSolved():
             return current
-        row, col, values = findBranchingCell(grid)
+        row, col, values = findBranchingCell(current)
         for value in values:
-            new_grid = deepcopy(grid)
+            new_grid = deepcopy(current)
             new_grid.set(row,col,value)
             stack.append(new_grid)
     return None
