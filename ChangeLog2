@@ -1,0 +1,7 @@
+08/01/2007
+==========
+* Afegit xmlparser.py
+* Afegit parametre extra idx a la funció Grid.set, ara acepta un index
+absolut, o un parell fila,columna
+* Separació de la interficie gràfica i el solver en dos fitxers diferents
+* Addició de la GPLv2 compatible amb la MIT
