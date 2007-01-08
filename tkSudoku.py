@@ -273,11 +273,31 @@ class Sudoku(object):
             self._grid.copy_values_from(solution)
 
 if __name__ == "__main__":
-
-    root = tki.Tk()
-    root.resizable(0,0)
-    root.title("tkSudoku")
-    Sudoku(root)
-    root.mainloop()
-
-    
+    # open log
+    import sys,logging
+    log = logging.mlog(sys.stdout,"stdout.log","w")
+    logerr = logging.mlog(sys.stderr,"stderr.log","w")
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    sys.stdout=log
+    sys.stderr=logerr
+    try:
+        root = tki.Tk()
+        root.resizable(0,0)
+        root.title("tkSudoku")
+        Sudoku(root)
+        root.mainloop()
+    except:
+        import traceback
+        trace=file("traceback.log","w")
+        traceback.print_exc(file=trace)
+        trace.close()
+        traceback.print_exc(file=sys.stderr)
+        import wx
+        app=wx.App(redirect=False)
+        wx.MessageBox(traceback.format_exc(),"Traceback",wx.ICON_ERROR)
+    # close log
+    sys.stdout=old_stdout
+    sys.stderr=old_stderr
+    log.close()
+    logerr.close()
