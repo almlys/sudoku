@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
+# $Id$
+#
 # Copyright (c) 2006 Juan Manuel Gimeno Illa
 # 
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -76,8 +78,14 @@ class Grid(object):
     def reset(self):
         for cell in self._cells: cell.reset()
 
-    def set(self, row, col, value):
+    def set(self, row=None, col=None, value=None, idx=None):
         """Sets value to the cell and propagates restrictions"""
+        if value==None:
+            raise TypeError, "Value argument not supplied!"
+        if idx!=None:
+            row, col = i2rc(idx)
+        elif row==None or col==None:
+            raise TypeError, "Neither of (row, col) or idx required arguments were supplied"
         self._cells[rc2i(row, col)].set(value)
         for rest in (Grid._rows[row],
                      Grid._cols[col], 
@@ -95,10 +103,18 @@ class Grid(object):
     def load_from_file(self, filename):
         # Does NOT control any error !!!!
         self.reset()
-        for row, line in enumerate(file(filename)):
-            for col, value in enumerate(line.strip()):
-                if value != "0":
-                    self.set(row, col, int(value))
+        if filename.endswith(".gpe"):
+            import xmlparser
+            p=xmlparser.XMLParser()
+            p.readfile(filename)
+            for cell in p.xworksheet[0].xcell:
+                if int(cell.pvalue)!=0:
+                    self.set(idx=int(cell.pidx),value=int(cell.pvalue))
+        else:
+            for row, line in enumerate(file(filename)):
+                for col, value in enumerate(line.strip()):
+                    if value != "0":
+                        self.set(row, col, int(value))
         
     def isSolved(self):
         for cell in self._cells:
@@ -209,25 +225,25 @@ def findBranchingCell(grid):
 
 class Observer(object):
     def __init__(self):
-	self._subject = None
+        self._subject = None
 	
     def setSubject(self,subject):
-	self._subject = subject
+        self._subject = subject
 
     def getSubject(self):
-	return self._subject
+        return self._subject
     
 class Subject(object):
     def __init__(self):
-	self._observers = []
+        self._observers = []
 
     def attach(self, observer):
-	observer.setSubject(self)
-	self._observers.append(observer)
+        observer.setSubject(self)
+        self._observers.append(observer)
 
     def notify(self):
-	for observer in self._observers:
-	    observer.update()
+        for observer in self._observers:
+            observer.update()
     
 # View classes
 
@@ -351,7 +367,7 @@ class MyCell(Cell, Subject):
 
     def __init__(self, grid, index):
         Cell.__init__(self)
-	Subject.__init__(self)
+        Subject.__init__(self)
         self._grid  = grid
         self._index = index
         
