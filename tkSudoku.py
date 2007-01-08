@@ -284,6 +284,7 @@ if __name__ == "__main__":
     try:
         root = tki.Tk()
         root.resizable(0,0)
+        raise "wrong"
         root.title("tkSudoku")
         Sudoku(root)
         root.mainloop()
