@@ -25,7 +25,7 @@
 #
 
 # logger class
-class mlog:
+class mlog(object):
     def __init__(self,handle,filename,mode="w"):
         self.file=file(filename,mode)
         self.handle=handle

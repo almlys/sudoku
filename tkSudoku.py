@@ -35,6 +35,8 @@ from copy import deepcopy
 import Tkinter as tki
 import tkFont
 from Sudoku import Grid, Cell, i2r, i2c, rc2b, Contradiction, solve
+import gettext
+gettext.install("awxsudoku","locales",True)
 
 # Util classes 
 
@@ -217,17 +219,17 @@ class Sudoku(object):
         buttonsFrame.pack()
 
         tki.Button(buttonsFrame,
-                   text="Load",
+                   text=_("Load"),
                    command=self._do_loadFromFile).pack(side=tki.LEFT)
 
         tki.Button(buttonsFrame,
-                   text="Solve",
+                   text=_("Solve"),
                    command=self._do_solve).pack(side=tki.LEFT)
         
         hide_possib = tki.IntVar()
         hide_possib.set(0)
         tki.Checkbutton(buttonsFrame,
-                        text="Show Hints",
+                        text=_("Show Hints"),
                         variable=hide_possib).pack(side=tki.LEFT)
 
         self._tgrid = TGrid(frame,
@@ -248,8 +250,9 @@ class Sudoku(object):
     def _do_loadFromFile(self):
         # TODO: Check errors !!!
         from tkFileDialog import askopenfilename
-        filename = askopenfilename(filetypes=(("TSudoku files","*.tsdk"),
-                                              ("All Files", "*")))
+        filename = askopenfilename(filetypes=((_("GPE files"),"*.gpe"),
+                                                (_("TSudoku files"),"*.tsdk"),
+                                                (_("All Files"), "*")))
         if not isinstance(filename, basestring): return # Exit if Cancel or Closed
         try:
             grid=Grid()
@@ -257,7 +260,7 @@ class Sudoku(object):
             self._grid.copy_values_from(grid)
         except Contradiction: # Dialog guarantees filename exists
             from tkMessageBox import showinfo
-            showinfo(message="Invalid sudoku file")
+            showinfo(message=_("Invalid sudoku file"))
 
     def _do_solve(self):
         try:
@@ -268,7 +271,7 @@ class Sudoku(object):
             solution = None
         if solution is None:
             from tkMessageBox import showinfo
-            showinfo(message="No solution has been found.")
+            showinfo(message=_("No solution has been found."))
         else:
             self._grid.copy_values_from(solution)
 
