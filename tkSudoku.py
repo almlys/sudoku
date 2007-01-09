@@ -36,7 +36,7 @@ import Tkinter as tki
 import tkFont
 from Sudoku import Grid, Cell, i2r, i2c, rc2b, Contradiction, solve
 import gettext
-gettext.install("awxsudoku","locales",True)
+gettext.install("awxpysudoku","./locales",True)
 
 # Util classes 
 

@@ -28,18 +28,55 @@
 """A Sudoku Solver"""
 
 import wx
-
+import gettext
+gettext.install("awxpysudoku","./locales",True)
 
 class SudokuMainFrame(wx.Frame):
     """Sudoku Main Frame"""
     def __init__(self,app,parent=None):
-        wx.Frame.__init__(self, parent, -1, _("Al's WxWidgets Python Sudoku"))
+        wx.Frame.__init__(self, parent, title="Al's WxWidgets Python Sudoku")
         self.app=app
         self.SetMinSize((630,430))
         self._initLayout()
     def _initLayout(self):
-        # Set Icon
         self.SetIcon(wx.Icon(self.app.config.get("global","gui.icon"),wx.BITMAP_TYPE_ICO))
+        self._bindEvents()
+        self._addStatusBar()
+        self._addMenus()
+        self._addToolBar()
+    def _bindEvents(self):
+        self.Bind(wx.EVT_CLOSE, self.OnExit)
+    def _addStatusBar(self):
+        self.StatusBar = wx.StatusBar(self)
+        self.StatusBar.SetFieldsCount(2)
+        self.SetStatusBar(self.StatusBar)
+    def _addMenus(self):
+        self.MenuBar=wx.MenuBar()
+        filemenu=wx.Menu()
+        #itm=filemenu.Append(wx.ID_ANY,_("&New..."))
+        #self.Bind(wx.EVT_MENU, self.OnOpen, itm)
+        itm=filemenu.Append(wx.ID_ANY,_("&Open..."))
+        self.Bind(wx.EVT_MENU, self.OnOpen, itm)
+        #itm=filemenu.Append(wx.ID_ANY,_("&Save..."))
+        #self.Bind(wx.EVT_MENU, self.OnOpen, itm)
+        itm=filemenu.Append(wx.ID_ANY,_("&Exit..."))
+        self.Bind(wx.EVT_MENU, self.OnExit, itm)
+        
+        self.MenuBar.Append(filemenu,_("&File"))
+        self.SetMenuBar(self.MenuBar)
+    def _addToolBar(self):
+        pass
+    def OnExit(self,evt):
+        if type(evt)!=wx.CloseEvent or evt.CanVeto():
+            ans=wx.MessageBox(_("Are you really sure that you wish to quit?"),_("Are you sure?"),wx.YES_NO)
+            if ans!=wx.YES:
+                if type(evt)==wx.CloseEvent:
+                    evt.Veto()
+                return
+        self.Destroy()
+    def OnOpen(self,evt):
+        print "open"
+
 
 class SudokuApp(wx.App):
     """main wxApp"""
