@@ -30,8 +30,8 @@ class mlog(object):
         self.file=file(filename,mode)
         self.handle=handle
     def write(self,x):
-        self.handle.write(x)
-        self.file.write(x)
+        self.handle.write(x.encode("utf-8"))
+        self.file.write(x.encode("utf-8"))
     def flush():
         self.handle.flush()
         self.file.flush()

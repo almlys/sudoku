@@ -34,7 +34,7 @@ except NameError:
 from copy import deepcopy
 import Tkinter as tki
 import tkFont
-from Sudoku import Grid, Cell, i2r, i2c, rc2b, Contradiction, solve
+from Sudoku import Grid, Cell, rc2i, i2r, i2c, rc2b, Contradiction, solve
 import gettext
 gettext.install("awxpysudoku","./locales",True)
 
