@@ -29,11 +29,30 @@
 
 import wx
 import gettext
+import observer
 
-class SudokuGrid(wx.Panel):
+class CellPanel(wx.Panel,observer.Observer):
+    """A TCells is the view of a Sudoku's cell"""
+
     def __init__(self, *args, **kwargs):
         wx.Panel.__init__(self,*args,**kwargs)
-        self.SetBackgroundColour((255,0,0))
+        observer.Observer.__init__(self)
+        self._initLayout()
+    def _initLayout(self):
+        self._sizer=wx.GridSizer(2,1)
+        self.SetSizer(self._sizer)
+        self.HintsLabel=wx.StaticText(self)
+        self.HintsLabel.SetLabel("123456789")
+        #self.HintsLabel.
+        self._sizer.Add(self.HintsLabel,flag=wx.ALIGN_CENTER)
+        self.TextBox=wx.TextCtrl(self,value="10")
+        self._sizer.Add(self.TextBox,flag=wx.ALIGN_CENTER)
+
+
+class SudokuGridPanel(wx.Panel):
+    def __init__(self, *args, **kwargs):
+        wx.Panel.__init__(self,*args,**kwargs)
+        self.SetBackgroundColour((48,7,11))
         self.sbr=3
         self.sbc=3
         self.r=3
@@ -42,19 +61,52 @@ class SudokuGrid(wx.Panel):
     def _initLayout(self):
         self._addGrid()
         self._bindEvents()
+#    def _addGrid(self):
+#        numr=self.sbr*self.r
+#        numc=self.sbc*self.c
+#        self._grid=wx.GridSizer(numr,numc)
+#        self.SetSizer(self._grid)
+#        for i in xrange(numr*numc):
+#            print i
+#            itm=wx.TextCtrl(self,value=str(i))
+#            self._grid.Add(itm,1)
+#            itm.Bind(wx.EVT_KEY_DOWN, self.OnKey)
     def _addGrid(self):
-        numr=self.sbr*self.r
-        numc=self.sbc*self.c
-        self._grid=wx.GridSizer(numr,numc)
+        self._grid=wx.GridSizer(self.r,self.c)
         self.SetSizer(self._grid)
-        for i in xrange(numr*numc):
-            print i
-            itm=wx.TextCtrl(self,value=str(i))
-            self._grid.Add(itm,1)
+        for r in xrange(self.r):
+            for c in xrange(self.c):
+                flag=wx.ALL
+                #flag=wx.BOTTOM | wx.RIGHT
+                #if c==0:
+                #    flag|=wx.LEFT
+                #if r==0:
+                #    flag|=wx.TOP
+                #print r,c,flag
+                cgrid=wx.GridSizer(self.sbr,self.sbc)
+                self._grid.Add(cgrid,border=5,flag=flag)
+                for br in xrange(self.sbc):
+                    for bc in xrange(self.sbr):
+                        #itm=wx.TextCtrl(self,value="%i,%i" %(c*self.sbc + bc,r*self.sbr + br))
+                        itm=CellPanel(self)
+                        cgrid.Add(itm,1,border=2,flag=wx.ALL)
+                        itm.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+                
     def _bindEvents(self):
         self.Bind(wx.EVT_KEY_DOWN, self.OnKey)
     def OnKey(self,evt):
-        print evt
+        #print evt
+        code=evt.GetKeyCode()
+        if code==wx.WXK_UP:
+            print "UP"
+        elif code==wx.WXK_DOWN:
+            print "DOWN"
+        elif code==wx.WXK_RIGHT:
+            print "RIGHT"
+        elif code==wx.WXK_LEFT:
+            print "LEFT"
+        else:
+            evt.Skip()
 
 
 class SudokuMainFrame(wx.Frame):
@@ -249,7 +301,7 @@ class SudokuMainFrame(wx.Frame):
         self.Sizer.Insert(0,self.ToolBar,flag=wx.EXPAND)
     def _addSudoku(self):
         if 0:
-            self.SudokuGrid=SudokuGrid(self)
+            self.SudokuGrid=SudokuGridPanel(self)
             self.Sizer.Insert(1,self.SudokuGrid,1,wx.EXPAND)
         else:
             panel=wx.ScrolledWindow(self)
@@ -259,7 +311,7 @@ class SudokuMainFrame(wx.Frame):
             self.Sizer.Insert(1,panel,1,wx.EXPAND)
             sizer=wx.GridSizer()
             panel.SetSizer(sizer)
-            self.SudokuGrid=SudokuGrid(panel)
+            self.SudokuGrid=SudokuGridPanel(panel)
             sizer.Add(self.SudokuGrid,0,wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL)
     def EnableUndo(self,enabled=True):
         self.__undo.Enable(enabled)

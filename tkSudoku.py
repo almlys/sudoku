@@ -63,33 +63,10 @@ from copy import deepcopy
 import Tkinter as tki
 import tkFont
 from Sudoku import Grid, Cell, rc2i, i2r, i2c, rc2b, Contradiction, solve
+from observer import Observer, Subject
 import gettext
-gettext.install("awxpysudoku","./locales",True)
+gettext.install("awxpysudoku","locales",True)
 
-# Util classes 
-
-class Observer(object):
-    def __init__(self):
-        self._subject = None
-	
-    def setSubject(self,subject):
-        self._subject = subject
-
-    def getSubject(self):
-        return self._subject
-    
-class Subject(object):
-    def __init__(self):
-        self._observers = []
-
-    def attach(self, observer):
-        observer.setSubject(self)
-        self._observers.append(observer)
-
-    def notify(self):
-        for observer in self._observers:
-            observer.update()
-    
     
 # View classes
 
