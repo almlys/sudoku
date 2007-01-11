@@ -1,0 +1,168 @@
+#
+# $Id: ca.po 71 2007-01-09 03:23:58Z alberto $
+#
+#    Copyright (C) 2007 Alberto Montañola Lacort
+#    See the file AUTHORS for more info
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+#    USA.
+#
+#    Please see the file COPYING for the full license.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: $Id$\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-01-10 00:56+0100\n"
+"PO-Revision-Date: 2007-01-10 00:56+0100\n"
+"Last-Translator: Alberto Montañola Lacort <alberto@almlys.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: wxSudoku.py:68
+msgid "&New..."
+msgstr ""
+
+#: wxSudoku.py:68
+msgid "Creates a New Sudoku"
+msgstr ""
+
+#: wxSudoku.py:73
+msgid "&Open..."
+msgstr ""
+
+#: wxSudoku.py:73
+msgid "Opens a Sudoku"
+msgstr ""
+
+#: wxSudoku.py:82
+msgid "&Exit"
+msgstr ""
+
+#: wxSudoku.py:82
+msgid "The application terminates"
+msgstr ""
+
+#: wxSudoku.py:87
+msgid "&File"
+msgstr ""
+
+#: wxSudoku.py:91
+msgid "&Solve"
+msgstr ""
+
+#: wxSudoku.py:91
+msgid "Solves the Sudoku (I thought that you were smart!)"
+msgstr ""
+
+#: wxSudoku.py:95
+msgid "&Undo"
+msgstr ""
+
+#: wxSudoku.py:95
+msgid "Goes back to the past, well, it undoes your latest mess"
+msgstr ""
+
+#: wxSudoku.py:101
+msgid "&Redo"
+msgstr ""
+
+#: wxSudoku.py:101
+msgid "Redoes your latest undo"
+msgstr ""
+
+#: wxSudoku.py:107
+msgid "&Sudoku"
+msgstr ""
+
+#: wxSudoku.py:111
+msgid "&Show Hints"
+msgstr ""
+
+#: wxSudoku.py:111
+msgid "It shows you some helpful information"
+msgstr ""
+
+#: wxSudoku.py:117
+#, python-format
+msgid "Changes your app language to %s"
+msgstr ""
+
+#: wxSudoku.py:121
+msgid "&Change Language"
+msgstr ""
+
+#: wxSudoku.py:121
+msgid "It allows you to change the language"
+msgstr ""
+
+#: wxSudoku.py:122
+msgid "&Options"
+msgstr ""
+
+#: wxSudoku.py:133
+msgid "Are you really sure that you wish to quit?"
+msgstr ""
+
+#: wxSudoku.py:133
+msgid "Are you sure?"
+msgstr ""
+
+#: wxSudoku.py:200
+msgid "English"
+msgstr ""
+
+#: wxSudoku.py:200
+msgid "Spanish"
+msgstr ""
+
+#: wxSudoku.py:200
+msgid "Catalan"
+msgstr ""
+
+#: tkSudoku.py:222
+msgid "Load"
+msgstr ""
+
+#: tkSudoku.py:226
+msgid "Solve"
+msgstr ""
+
+#: tkSudoku.py:232
+msgid "Show Hints"
+msgstr ""
+
+#: tkSudoku.py:253
+msgid "GPE files"
+msgstr ""
+
+#: tkSudoku.py:254
+msgid "TSudoku files"
+msgstr ""
+
+#: tkSudoku.py:255
+msgid "All Files"
+msgstr ""
+
+#: tkSudoku.py:263
+msgid "Invalid sudoku file"
+msgstr ""
+
+#: tkSudoku.py:274
+msgid "No solution has been found."
+msgstr ""
+
