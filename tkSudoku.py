@@ -217,11 +217,18 @@ class Sudoku(object):
         self._connect()
 
     def _create_view(self, master):
-        frame = tki.Frame(master)
-        frame.pack()
+        self.frame = tki.Frame(master)
+        self.frame.pack()
+
+        self.buttonsFrame = tki.Frame(self.frame)
+        self.buttonsFrame.pack()
+
+        self._create_buttons_frame(self.buttonsFrame)
         
-        buttonsFrame = tki.Frame(frame)
-        buttonsFrame.pack()
+        self._tgrid = TGrid(self.frame,
+                            hide_possib=self.hide_possib)
+
+    def _create_buttons_frame(self,buttonsFrame):
 
         tki.Button(buttonsFrame,
                    text=_("Load"),
@@ -230,15 +237,18 @@ class Sudoku(object):
         tki.Button(buttonsFrame,
                    text=_("Solve"),
                    command=self._do_solve).pack(side=tki.LEFT)
+
+        tki.Button(buttonsFrame,
+                   text=_("Test"),
+                   command=self._do_test).pack(side=tki.LEFT)
+
         
-        hide_possib = tki.IntVar()
-        hide_possib.set(0)
+        self.hide_possib = tki.IntVar()
+        self.hide_possib.set(0)
         tki.Checkbutton(buttonsFrame,
                         text=_("Show Hints"),
-                        variable=hide_possib).pack(side=tki.LEFT)
-
-        self._tgrid = TGrid(frame,
-                            hide_possib=hide_possib)
+                        variable=self.hide_possib).pack(side=tki.LEFT)
+        
 
     def _create_model(self):
         self._grid = MyGrid()
@@ -279,6 +289,10 @@ class Sudoku(object):
             showinfo(message=_("No solution has been found."))
         else:
             self._grid.copy_values_from(solution)
+
+    def _do_test(self):
+        gettext.translation("awxpysudoku","./locales",("ca",)).install(True)
+        self._create_buttons_frame(self.buttonsFrame)
 
 if __name__ == "__main__":
     # open log
