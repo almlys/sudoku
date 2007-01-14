@@ -54,8 +54,8 @@ class SudokuGridPanel(wx.Panel):
         wx.Panel.__init__(self,*args,**kwargs)
         self.SetBackgroundColour((48,7,11))
         self.sbr=3
-        self.sbc=3
-        self.r=3
+        self.sbc=2
+        self.r=2
         self.c=3
         self._initLayout()
     def _initLayout(self):
