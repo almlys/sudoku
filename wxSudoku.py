@@ -27,73 +27,113 @@
 
 """A Sudoku Solver"""
 
-import wx
+try:
+    import wx
+except ImportError:
+    print "WxPython 2.6 or higher is required to run this application!!!"
+    print
+    print "You can get it from http://www.wxpython.org"
+    print "Or you can just type as root \"apt-get install python-wxgtk2.6\" on Debian, Ubuntu and any other Debian based distros"
+    print "On other distros you may try similar commands, yum, urpmi, emerge,..., just check your Distro documentation"
+    print "but if you don't have root access you will need to manually install wxPython in your home directory, have fun!"
+    #import webbrowser
+    #webbrowser.open_new("http://www.wxpython.org")
+    import sys
+    sys.exit(-1)
 import gettext
+import Sudoku
 import observer
 
-class CellPanel(wx.Panel,observer.Observer):
-    """A TCells is the view of a Sudoku's cell"""
+# Glue with the model
 
-    def __init__(self, *args, **kwargs):
-        wx.Panel.__init__(self,*args,**kwargs)
+class MyGrid(Sudoku.Grid):
+
+    def _make_cells(self):
+        return [MyCell(self, index) for index in xrange(81)]
+        
+class MyCell(Sudoku.Cell, observer.Subject):
+
+    def __init__(self, grid, index):
+        Sudoku.Cell.__init__(self)
+        obsrver.Subject.__init__(self)
+        self._grid  = grid
+        self._index = index
+
+    def reset(self):
+        Sudoku.Cell.reset(self)
+        self.notify()
+
+    def set(self, value):
+        Sudoku.Cell.set(self, value)
+        self.notify()
+
+    def markImpossible(self,value):
+        Sudoku.Cell.markImpossible(self, value)
+        self.notify()
+
+
+# View classes
+
+class CellPanel(wx.Panel,observer.Observer):
+    """A CellPanel is the view of a Sudoku's cell"""
+
+    def __init__(self, parent, idx, bgcolor=(255,0,0), *args, **kwargs):
+        wx.Panel.__init__(self,parent,*args,**kwargs)
+        self.SetBackgroundColour(bgcolor)
         observer.Observer.__init__(self)
+        self.row, self.col = idx
         self._initLayout()
+
     def _initLayout(self):
-        self._sizer=wx.GridSizer(2,1)
+        self._sizer=wx.GridSizer(0,1)
         self.SetSizer(self._sizer)
-        self.HintsLabel=wx.StaticText(self)
+        self.HintsLabel=wx.StaticText(self,style=wx.ALIGN_RIGHT | wx.SIMPLE_BORDER)
         self.HintsLabel.SetLabel("123456789")
-        #self.HintsLabel.
-        self._sizer.Add(self.HintsLabel,flag=wx.ALIGN_CENTER)
-        self.TextBox=wx.TextCtrl(self,value="10")
-        self._sizer.Add(self.TextBox,flag=wx.ALIGN_CENTER)
+        self.HintsLabel.SetFont(wx.FFont(9,wx.FONTFAMILY_DEFAULT,face="Arial"))
+        self._sizer.Add(self.HintsLabel,0,flag=wx.ALIGN_RIGHT | wx.EXPAND)
+        self.TextBox=wx.TextCtrl(self,value="%i,%i" %(self.row,self.col))
+        self.TextBox.SetFont(wx.FFont(18,wx.FONTFAMILY_DEFAULT,face="Arial",flags=wx.FONTFLAG_BOLD))
+        self.TextBox.SetBackgroundColour(self.GetBackgroundColour())
+        #self.TextBox.SetSize((30,5))
+        self._sizer.Add(self.TextBox,1,flag=wx.ALIGN_RIGHT | wx.EXPAND)
 
 
 class SudokuGridPanel(wx.Panel):
+    """Represents the 9x9 grid formed by 3x3 Tboxes"""
+
     def __init__(self, *args, **kwargs):
         wx.Panel.__init__(self,*args,**kwargs)
         self.SetBackgroundColour((48,7,11))
+        self.Cells=[]
         self.sbr=3
-        self.sbc=2
-        self.r=2
+        self.sbc=3
+        self.r=3
         self.c=3
         self._initLayout()
+
     def _initLayout(self):
         self._addGrid()
         self._bindEvents()
-#    def _addGrid(self):
-#        numr=self.sbr*self.r
-#        numc=self.sbc*self.c
-#        self._grid=wx.GridSizer(numr,numc)
-#        self.SetSizer(self._grid)
-#        for i in xrange(numr*numc):
-#            print i
-#            itm=wx.TextCtrl(self,value=str(i))
-#            self._grid.Add(itm,1)
-#            itm.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+
     def _addGrid(self):
         self._grid=wx.GridSizer(self.r,self.c)
         self.SetSizer(self._grid)
         for r in xrange(self.r):
             for c in xrange(self.c):
-                flag=wx.ALL
-                #flag=wx.BOTTOM | wx.RIGHT
-                #if c==0:
-                #    flag|=wx.LEFT
-                #if r==0:
-                #    flag|=wx.TOP
-                #print r,c,flag
+                flag=wx.ALL | wx.EXPAND
+                bgcolor = ((0xCB,0x83,0xAC),(0xCB,0x9E,0xAC))[(r*self.r + c) % 2]
                 cgrid=wx.GridSizer(self.sbr,self.sbc)
-                self._grid.Add(cgrid,border=5,flag=flag)
+                self._grid.Add(cgrid,1,border=1,flag=flag)
                 for br in xrange(self.sbc):
                     for bc in xrange(self.sbr):
-                        #itm=wx.TextCtrl(self,value="%i,%i" %(c*self.sbc + bc,r*self.sbr + br))
-                        itm=CellPanel(self)
-                        cgrid.Add(itm,1,border=2,flag=wx.ALL)
+                        #itm=wx.TextCtrl(self,value="%i,%i" %(c*self.sbc + bc,r*self.sbr + br))s
+                        itm=CellPanel(self,(r*self.sbr + br,c*self.sbc + bc),bgcolor)
+                        cgrid.Add(itm,1,border=1,flag=wx.ALL | wx.EXPAND)
                         itm.Bind(wx.EVT_KEY_DOWN, self.OnKey)
-                
+
     def _bindEvents(self):
         self.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+
     def OnKey(self,evt):
         #print evt
         code=evt.GetKeyCode()
@@ -111,12 +151,14 @@ class SudokuGridPanel(wx.Panel):
 
 class SudokuMainFrame(wx.Frame):
     """Sudoku Main Frame"""
+
     def __init__(self,app,parent=None):
         wx.Frame.__init__(self, parent, title="Al's WxWidgets Python Sudoku", style=wx.DEFAULT_FRAME_STYLE | wx.VSCROLL | wx.HSCROLL | wx.ALWAYS_SHOW_SB)
         self.app=app
         self.SetMinSize((630,430))
         self.ShowHints=False
         self._initLayout()
+
     def _initLayout(self):
         self.SetIcon(wx.Icon(self.app.config.get("global","gui.icon"),wx.BITMAP_TYPE_ICO))
         self._loadAccessKeys()
@@ -127,12 +169,14 @@ class SudokuMainFrame(wx.Frame):
         self._addSizer()
         self._addToolBar()
         self._addSudoku()
+
     def _loadAccessKeys(self):
         # Put here something that gets the access keys from the system configuration
         # but I currently don't have any clue how to do that, yet...
         self.__accesskeys = {"new":"Ctrl+N","open":"Ctrl+O","save":"Ctrl+S",
                             "exit":"Ctrl+Q","solve":"Ctrl+R","undo":"Ctrl+Z",
                             "redo":"Ctrl+Shift+Z","hints":"Ctrl+H","console":"F12"}
+
     def _loadHelpTips(self):
         self.__HelpTips = {"new":_("Creates a New Sudoku"),"open":_("Opens a Sudoku"),
                            "save":_("Saves a Sudoku"),"exit":_("The application terminates"),
@@ -147,27 +191,34 @@ class SudokuMainFrame(wx.Frame):
                            "about":_("I need to explain what does this thing do?"),
                            "console":_("Opens a Python Interactive console, It's that cool")
                            }
+
     def _getAKey(self,key):
         """Returns the Access key"""
         if key in self.__accesskeys:
             return "\t" + self.__accesskeys[key]
         return ""
+
     def _getTip(self,key):
         if key in self.__HelpTips:
             return self.__HelpTips[key]
         return ""
+
     def _bindEvents(self):
         self.Bind(wx.EVT_CLOSE, self.OnExit)
+
     def _addStatusBar(self):
         self.StatusBar = wx.StatusBar(self)
         self.StatusBar.SetFieldsCount(1)
         self.SetStatusBar(self.StatusBar)
+
     def _getMenuArt(self,id):
         isize=(16,16)
         return wx.ArtProvider_GetBitmap(id,wx.ART_MENU,isize)
+
     def _getToolBarArt(self,id):
         isize=(16,16)
         return wx.ArtProvider_GetBitmap(id,wx.ART_TOOLBAR,isize)
+
     def _addMenus(self):
         self.MenuBar=wx.MenuBar()
         filemenu=wx.Menu()
@@ -268,9 +319,11 @@ class SudokuMainFrame(wx.Frame):
         self.MenuBar.Append(filemenu,_("&Help"))
 
         self.SetMenuBar(self.MenuBar)
+
     def _addSizer(self):
         self.Sizer=wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.Sizer)
+
     def _addToolBar(self):
         self.ToolBar=wx.ToolBar(self,style=wx.NO_BORDER|wx.TB_HORIZONTAL|wx.TB_TEXT)
         itm=self.ToolBar.AddSimpleTool(wx.ID_ANY,self._getToolBarArt(wx.ART_NEW),_("New..."),self._getTip("new"))
@@ -299,8 +352,9 @@ class SudokuMainFrame(wx.Frame):
         self.ToolBar.Realize()
         self.Sizer.Remove(0)
         self.Sizer.Insert(0,self.ToolBar,flag=wx.EXPAND)
+
     def _addSudoku(self):
-        if 0:
+        if 1:
             self.SudokuGrid=SudokuGridPanel(self)
             self.Sizer.Insert(1,self.SudokuGrid,1,wx.EXPAND)
         else:
@@ -313,12 +367,15 @@ class SudokuMainFrame(wx.Frame):
             panel.SetSizer(sizer)
             self.SudokuGrid=SudokuGridPanel(panel)
             sizer.Add(self.SudokuGrid,0,wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL)
+
     def EnableUndo(self,enabled=True):
         self.__undo.Enable(enabled)
         self.ToolBar.EnableTool(self.__undobtid,enabled)
+
     def EnableRedo(self,enabled=True):
         self.__redo.Enable(enabled)
         self.ToolBar.EnableTool(self.__redobtid,enabled)
+
     def OnExit(self,evt):
         if type(evt)!=wx.CloseEvent or evt.CanVeto():
             ans=wx.MessageBox(_("Are you really sure that you wish to quit?"),_("Are you sure?"),wx.YES_NO)
@@ -327,16 +384,22 @@ class SudokuMainFrame(wx.Frame):
                     evt.Veto()
                 return
         self.Destroy()
+
     def OnNew(self,evt):
         print "new"
+
     def OnOpen(self,evt):
         print "open"
+
     def OnSolve(self,evt):
         print "solve"
+
     def OnUndo(self,evt):
         print "undo"
+
     def OnRedo(self,evt):
         print "redo"
+
     def OnShowHints(self,evt):
         self.ShowHints = not self.ShowHints
         if evt.GetId()==self.__hintsbtid:
@@ -349,14 +412,17 @@ class SudokuMainFrame(wx.Frame):
             print "showhints enabled"
         else:
             print "showhints dissabled"
+
     def OnChangeLanguage(self,evt):
         print "Change language", self.__LangList[evt.GetId()]
         self.app.SetLanguage(self.__LangList[evt.GetId()])
         self._loadHelpTips()
         self._addMenus()
         self._addToolBar()
+
     def OnKey(self,evt):
         print evt
+
     def OnAbout(self,evt):
         wx.MessageBox(_(u"""
 Al's WxWidgets Python Sudoku.
@@ -378,6 +444,7 @@ This program is distributed in the hope that it will be useful,\
  See the GNU General Public License for more details.
 
 """) %("$Id$",),_("About %s") %("Al's WxWidgets Python Sudoku",),wx.OK)
+
     def OnConsole(self,evt):
         try:
             self.shellframe.Close()
@@ -395,10 +462,12 @@ This program is distributed in the hope that it will be useful,\
 
 class SudokuApp(wx.App):
     """main wxApp"""
+
     def __init__(self,config="wxSudoku.cfg"):
         self.__configFile=config
         self.config=None
         wx.App.__init__(self,redirect=False)
+
     def _loadConfig(self,cfg=None):
         """Load App configuration"""
         import ConfigParser
@@ -407,9 +476,11 @@ class SudokuApp(wx.App):
         self.config=ConfigParser.SafeConfigParser()
         self.config.add_section("global")
         self.config.set("global","gui.icon","favicon.ico")
-        self.config.set("global","app.locales","locales")
+        self.config.set("global","app.gettext.locales","locales")
+        self.config.set("global","app.gettext.domain","alssudoku")
         if cfg!=None:
             self.config.read(cfg)
+
     def _saveConfig(self,cfg=None):
         """Save App configuration"""
         if cfg==None:
@@ -417,20 +488,26 @@ class SudokuApp(wx.App):
         fo=file(cfg,"w")
         self.config.write(fo)
         fo.close()
+
     def _getcfg(self,section,key):
         try:
             return self.config.get(section,key)
         except ConfigParser.NoOptionError:
             return None
+
     def _installGettext(self,lang=None):
         if lang==None:
-            gettext.install("awxpysudoku",self._getcfg("global","app.locales"),True)
+            gettext.install(self._getcfg("global","app.gettext.domain"),
+                            self._getcfg("global","app.gettext.locales"),True)
         else:
-            gettext.translation("awxpysudoku",self._getcfg("global","app.locales"),(lang,)).install(True)
+            gettext.translation(self._getcfg("global","app.gettext.domain"),
+                                self._getcfg("global","app.gettext.locales"),(lang,)).install(True)
+
     def _showMainFrame(self):
         self.mainFrame=SudokuMainFrame(self)
         self.SetTopWindow(self.mainFrame)
         self.mainFrame.Show(True)
+
     def GetLanguages(self):
         try:
             return self.__Languages
@@ -446,11 +523,13 @@ class SudokuApp(wx.App):
                 else:
                     self.__Languages[lan]=lan
             return self.__Languages
+
     def SetLanguage(self,lang):
         #import locale
         #locale.setlocale(locale.LC_ALL, (lang,"utf-8"))
         self.__Language=lang
         self._installGettext(lang)
+
     def GetLanguage(self):
         try:
             return self.__Language
@@ -458,11 +537,13 @@ class SudokuApp(wx.App):
             import locale
             self.__Language=locale.getdefaultlocale()[0][:2]
             return self.__Language
+
     def OnInit(self):
         self._loadConfig()
         self._installGettext()
         self._showMainFrame()
         return True
+
     def OnExit(self):
         self._saveConfig()
 

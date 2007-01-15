@@ -65,14 +65,13 @@ import tkFont
 from Sudoku import Grid, Cell, rc2i, i2r, i2c, rc2b, Contradiction, solve
 from observer import Observer, Subject
 import gettext
-gettext.install("awxpysudoku","locales",True)
+gettext.install("alssudoku","locales",True)
 
     
 # View classes
 
 class TGrid(object):
     """Represents the 9x9 grid formed by 3x3 Tboxes"""
-
     def __init__(self, master, hide_possib):
         self._widget = tki.Frame(master,
                                  borderwidth=2,
@@ -150,7 +149,7 @@ class TCell(Observer):
             self._value_entry.config(state=tki.NORMAL)
         else:
             new_value = str(mcell._value)
-            self._value_entry.config(state=tki.DISABLED)
+            #self._value_entry.config(state=tki.DISABLED)
         self._value_var.set(new_value)
         if self._hide_possib.get() == 0 or mcell._value != 0:
             new_possi = ""
@@ -163,12 +162,12 @@ class TCell(Observer):
     def on_change(self, event):
         """The entry has changed so we must notify the model."""
         mcell = self.getSubject()
-        try:
-            new_value = int(self._value_var.get())
-            mcell._grid.set(i2r(mcell._index), i2c(mcell._index), new_value)
-            self._value_entry.config(state=tki.DISABLED)
-        except (Contradiction, ValueError):
-            self._value_var.set("")
+        #try:
+        new_value = int(self._value_var.get())
+        mcell._grid.set(i2r(mcell._index), i2c(mcell._index), new_value)
+            #self._value_entry.config(state=tki.DISABLED)
+        #except (Contradiction, ValueError):
+        #    self._value_var.set("")
 
     def on_move(self, event):
         key = event.keysym
