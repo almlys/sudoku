@@ -104,6 +104,9 @@ class Grid(object):
     def reset(self):
         for cell in self._cells: cell.reset()
 
+    def resetDomain(self):
+        for cell in self._cells: cell.resetDomain()
+
     def set(self, idx, value=None):
         """Sets value to the cell and propagates restrictions"""
         if not isinstance(idx,tuple):
@@ -119,6 +122,25 @@ class Grid(object):
             for index in rest:
                 if self._cells[index].get() == 0:
                     self._cells[index].markImpossible(value)
+
+    def unset(self, idx):
+        """UnSets value to the cell and propagates restrictions"""
+        if not isinstance(idx,tuple):
+            row, col = i2rc(idx)
+        elif len(idx)==2:
+            row, col = idx
+        else:
+            raise TypeError, "Too many items in idx tuple"
+        self._cells[rc2i(row,col)].reset()
+        self.UpdateRestrictions()
+
+    def UpdateRestrictions(self):
+        self.resetDomain()
+        for index, cell in enumerate(self._cells):
+            if cell.get()!=0:
+                self.set((index),cell.get())
+                
+        
 
     def copy_values_from(self, from_grid):
         self.reset()
@@ -182,13 +204,17 @@ class Cell(object):
     def reset(self):
         self._value = 0
         self._possibls = set(xrange(1,10))
+
+    def resetDomain(self):
+        if self._value == 0:
+            self._possibls = set(xrange(1,10))
         
     def set(self, value):
         if value not in self._possibls:
             print value,self._possibls
             raise Contradiction()
         self._value = value
-        #self._possibls = set((value,))
+        self._possibls = set((value,))
 
     def get(self):
         return self._value
@@ -199,7 +225,7 @@ class Cell(object):
     def markImpossible(self,value):
         self._possibls.discard(value)
         if len(self._possibls) == 0:
-            raise Contradiction()
+            raise Contradiction
         
     def isSingleton(self):
         return self._value == 0 and len(self._possibls) == 1

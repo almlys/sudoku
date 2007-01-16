@@ -63,6 +63,10 @@ class MyCell(Sudoku.Cell, observer.Subject):
         Sudoku.Cell.reset(self)
         self.notify()
 
+    def resetDomain(self):
+        Sudoku.Cell.resetDomain(self)
+        self.notify()
+
     def set(self, value):
         Sudoku.Cell.set(self, value)
         self.notify()
@@ -184,21 +188,31 @@ class CellPanel(wx.Panel,observer.Observer):
             new_value = 0
         if new_value == old_value:
             return
-        try:
-            mcell._grid.set(mcell._index, new_value)
-        except:
-            pass
-        self.parent.parent.EnableUndo(True)
-        self.parent.parent.EnableRedo(False)
-        self.parent.History.Stack([mcell._index,old_value,new_value])
+
+        if old_value!=0:
+            mcell._grid.unset(mcell._index)
+        if new_value!=0:
+            try:
+                mcell._grid.set(mcell._index, new_value)
+            except Sudoku.Contradiction:
+                self.TextBox.SetValue("")
+                new_value=0
+
+        if new_value!=old_value:
+            self.parent.parent.EnableUndo(True)
+            self.parent.parent.EnableRedo(False)
+            self.parent.History.Stack([mcell._index,old_value,new_value])
+
 
 
 class SudokuGridPanel(wx.Panel):
     """Represents the 9x9 grid formed by 3x3 Tboxes"""
 
-    def __init__(self, parent, *args, **kwargs):
-        wx.Panel.__init__(self,parent,*args,**kwargs)
-        self.parent=parent
+    def __init__(self, appparent, parentpanel=None, *args, **kwargs):
+        if parentpanel==None:
+            parentpanel=appparent
+        wx.Panel.__init__(self,parentpanel,*args,**kwargs)
+        self.parent=appparent
         self.SetBackgroundColour((48,7,11))
         self._ShowHints=False
         self.sbr=3
@@ -274,7 +288,9 @@ class SudokuGridPanel(wx.Panel):
         if self.History.isEmpty():
             self.parent.EnableUndo(False)
         print idx,old
-        self._ModelGrid.set(idx,old)
+        self._ModelGrid.unset(idx)
+        if old!=0:
+            self._ModelGrid.set(idx,old)
 
     def Redo(self):
         self.parent.EnableUndo(True)
@@ -282,7 +298,9 @@ class SudokuGridPanel(wx.Panel):
         if self.History.isRedoEmpty():
             self.parent.EnableRedo(False)
         print idx,new
-        self._ModelGrid.set(idx,new)
+        self._ModelGrid.unset(idx)
+        if new!=0:
+            self._ModelGrid.set(idx,new)
 
 
 
@@ -510,7 +528,7 @@ class SudokuMainFrame(wx.Frame):
             self.Sizer.Insert(1,panel,1,wx.EXPAND)
             sizer=wx.GridSizer()
             panel.SetSizer(sizer)
-            self.SudokuGrid=SudokuGridPanel(panel)
+            self.SudokuGrid=SudokuGridPanel(self,panel)
             sizer.Add(self.SudokuGrid,0,wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL)
 
     def EnableUndo(self,enabled=True):
