@@ -124,20 +124,24 @@ class CellPanel(wx.Panel,observer.Observer):
         self._initLayout()
 
     def _initLayout(self):
-        self._sizer=wx.GridSizer(0,1)
+        #szb=wx.GridSizer(0,1)
+        self._sizer=wx.BoxSizer(wx.VERTICAL)
+        #self._sizer.SetFlexibleDirection(wx.VERTICAL)
+        #szb.Add(self._sizer,flag=wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL | wx.EXPAND)
+        #self.SetSizer(szb)
         self.SetSizer(self._sizer)
-        self.HintsLabel=wx.StaticText(self,style=wx.ALIGN_RIGHT | wx.SIMPLE_BORDER)
+        self.HintsLabel=wx.StaticText(self,style=wx.ALIGN_CENTER)
         self.HintsLabel.SetLabel("123456789")
         self.HintsLabel.SetFont(wx.FFont(9,wx.FONTFAMILY_DEFAULT,face="Arial"))
-        self._sizer.Add(self.HintsLabel,0,flag=wx.ALIGN_RIGHT | wx.EXPAND)
-        self.TextBox=wx.TextCtrl(self,value="%i,%i" %(self.row,self.col),style=wx.TE_PROCESS_ENTER)
+        self._sizer.Add(self.HintsLabel,0,flag=wx.ALIGN_CENTER)
+        self.TextBox=wx.TextCtrl(self,value="%i,%i" %(self.row,self.col),size=(-1,-1),style=wx.TE_PROCESS_ENTER | wx.NO_BORDER | wx.TE_CENTRE)
         self.TextBox.SetFont(wx.FFont(18,wx.FONTFAMILY_DEFAULT,face="Arial",flags=wx.FONTFLAG_BOLD))
         self.TextBox.SetBackgroundColour(self.GetBackgroundColour())
         #self.TextBox.SetSize((30,5))
         self.TextBox.Bind(wx.EVT_KEY_DOWN,self.OnKey)
         self.TextBox.Bind(wx.EVT_TEXT_ENTER,self.OnChange)
         self.TextBox.Bind(wx.EVT_KILL_FOCUS,self.OnChange)
-        self._sizer.Add(self.TextBox,1,flag=wx.ALIGN_RIGHT | wx.EXPAND)
+        self._sizer.Add(self.TextBox,1,flag=wx.ALIGN_CENTER | wx.EXPAND)
 
     def update(self, *args):
         """The model cell has changed so we must update the view"""
@@ -154,6 +158,7 @@ class CellPanel(wx.Panel,observer.Observer):
         else:
             new_possi = ""
         self.HintsLabel.SetLabel(new_possi)
+        self._sizer.Layout()
 
     def OnKey(self,evt):
         #print evt
@@ -541,7 +546,7 @@ class SudokuMainFrame(wx.Frame):
                 grid=Sudoku.Grid()
                 grid.load_from_file(dlg.GetDirectory() + "/" + dlg.GetFilename())
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
-            except Sudoku.Contradition:
+            except Sudoku.Contradiction:
                 wx.MessageBox(_("Invalid sudoku file"),_("Invalid sudoku file"),
                               style=wx.ICON_INFORMATION)
         dlg.Destroy()
@@ -555,15 +560,23 @@ class SudokuMainFrame(wx.Frame):
             try:
                 f=urllib.urlopen(dlg.GetValue())
                 grid=Sudoku.Grid()
-                grid.load_from_stream(f)
+                if dlg.GetValue().lower().endswith(".gpe"):
+                    ftype="gpe"
+                else:
+                    ftype="tsdk"
+                grid.load_from_stream(f,ftype)
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
-            except Sudoku.Contradition:
+                f.close()
+            except Sudoku.Contradiction:
+                f.close()
                 wx.MessageBox(_("Invalid sudoku file"),_("Invalid sudoku file"),
                               style=wx.ICON_INFORMATION)
-            except:
-                pass
-            f.close()
-
+            except urllib.HTTPError,detail:
+                wx.MessageBox(_("The server said:\n%s\nRequesting the %s resource") %(detail,dlg.GetValue()),
+                              _("Remote server error"),
+                              style=wx.ICON_INFORMATION)
+            except (urllib.URLError,ValueError),detail:
+                wx.MessageBox(_("Cannot open %s, reason %s") %(dlg.GetValue(),detail))
         dlg.Destroy()
         
 

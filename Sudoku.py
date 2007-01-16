@@ -129,7 +129,7 @@ class Grid(object):
     def load_from_file(self, filename):
         # Does NOT control any error !!!!
         self.reset()
-        if filename.endswith(".gpe"):
+        if filename.lower().endswith(".gpe"):
             import xmlparser
             p=xmlparser.XMLParser()
             p.readfile(filename)
@@ -141,6 +141,23 @@ class Grid(object):
                 for col, value in enumerate(line.strip()):
                     if value != "0":
                         self.set(row, col, int(value))
+
+    def load_from_stream(self, data, ftype):
+        # Does NOT control any error !!!!
+        self.reset()
+        if ftype=="gpe":
+            import xmlparser
+            p=xmlparser.XMLParser()
+            p.parse(data.read())
+            for cell in p.xworksheet[0].xcell:
+                if int(cell.pvalue)!=0:
+                    self.set(idx=int(cell.pidx),value=int(cell.pvalue))
+        else:
+            for row, line in enumerate(data):
+                for col, value in enumerate(line.strip()):
+                    if value != "0":
+                        self.set(row, col, int(value))
+
         
     def isSolved(self):
         for cell in self._cells:
