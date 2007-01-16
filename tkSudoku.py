@@ -164,7 +164,7 @@ class TCell(Observer):
         mcell = self.getSubject()
         #try:
         new_value = int(self._value_var.get())
-        mcell._grid.set(i2r(mcell._index), i2c(mcell._index), new_value)
+        mcell._grid.set((i2r(mcell._index), i2c(mcell._index)), new_value)
             #self._value_entry.config(state=tki.DISABLED)
         #except (Contradiction, ValueError):
         #    self._value_var.set("")
@@ -290,14 +290,14 @@ class Sudoku(object):
             self._grid.copy_values_from(solution)
 
     def _do_test(self):
-        gettext.translation("awxpysudoku","./locales",("ca",)).install(True)
+        gettext.translation("alssudoku","locales",("ca",)).install(True)
         self._create_buttons_frame(self.buttonsFrame)
 
 if __name__ == "__main__":
     # open log
-    import sys,logging
-    log = logging.mlog(sys.stdout,"stdout.log","w")
-    logerr = logging.mlog(sys.stderr,"stderr.log","w")
+    import sys,sdlogger
+    log = sdlogger.mlog(sys.stdout,"stdout.log","w")
+    logerr = sdlogger.mlog(sys.stderr,"stderr.log","w")
     old_stdout = sys.stdout
     old_stderr = sys.stderr
     sys.stdout=log

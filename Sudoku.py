@@ -104,14 +104,14 @@ class Grid(object):
     def reset(self):
         for cell in self._cells: cell.reset()
 
-    def set(self, row=None, col=None, value=None, idx=None):
+    def set(self, idx, value=None):
         """Sets value to the cell and propagates restrictions"""
-        if value==None:
-            raise TypeError, "Value argument not supplied!"
-        if idx!=None:
+        if not isinstance(idx,tuple):
             row, col = i2rc(idx)
-        elif row==None or col==None:
-            raise TypeError, "Neither of (row, col) or idx required arguments were supplied"
+        elif len(idx)==2:
+            row, col = idx
+        else:
+            raise TypeError, "Too many items in idx tuple"
         self._cells[rc2i(row, col)].set(value)
         for rest in (Grid._rows[row],
                      Grid._cols[col], 
@@ -124,7 +124,7 @@ class Grid(object):
         self.reset()
         for index, from_cell in enumerate(from_grid._cells):
             if from_cell.get() != 0:
-                self.set(i2r(index), i2c(index), from_cell.get())
+                self.set((i2r(index), i2c(index)), from_cell.get())
 
     def load_from_file(self, filename):
         # Does NOT control any error !!!!
@@ -168,9 +168,10 @@ class Cell(object):
         
     def set(self, value):
         if value not in self._possibls:
+            print value,self._possibls
             raise Contradiction()
         self._value = value
-        self._possibls = set((value,))
+        #self._possibls = set((value,))
 
     def get(self):
         return self._value
@@ -204,7 +205,7 @@ def solve(grid):
         row, col, values = findBranchingCell(current)
         for value in values:
             new_grid = deepcopy(current)
-            new_grid.set(row,col,value)
+            new_grid.set((row,col),value)
             stack.append(new_grid)
     return None
 
@@ -216,7 +217,7 @@ def applyHeuristics(grid):
         if len(deduced) == 0:
             return
         for row, col, value in deduced:
-            grid.set(row, col, value)
+            grid.set((row, col), value)
 
 def getSingletons(grid):
     return [(i2r(i), i2c(i), grid._cells[i].getPossibleValues()[0])
@@ -235,6 +236,10 @@ def getUniques(grid):
     return result
 
 def findBranchingCell(grid):
+    # Workaround for anyone attempting to solve an empty Sudoku
+    minindex = 0
+    minvalues = [1,]
+    # End workaround
     minspan = 9
     for index in xrange(81):
         if grid._cells[index].isUndecided():
