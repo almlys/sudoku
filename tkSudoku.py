@@ -67,7 +67,7 @@ from observer import Observer, Subject
 import gettext
 gettext.install("alssudoku","locales",True)
 
-    
+
 # View classes
 
 class TGrid(object):
@@ -207,25 +207,33 @@ class MyCell(Cell, Subject):
 
 # Controller class 
 
-class Sudoku(object):
+class Sudoku(tki.Frame):
     """Application class"""
     
     def __init__(self, master):
-        self._create_view(master)
+        tki.Frame.__init__(self,master)
+        self._create_view()
         self._create_model()
         self._connect()
 
-    def _create_view(self, master):
-        self.frame = tki.Frame(master)
-        self.frame.pack()
-
-        self.buttonsFrame = tki.Frame(self.frame)
+    def _create_view(self):
+        self.pack()
+        self._create_menu()
+        
+        self.buttonsFrame = tki.Frame(self)
         self.buttonsFrame.pack()
 
         self._create_buttons_frame(self.buttonsFrame)
         
-        self._tgrid = TGrid(self.frame,
-                            hide_possib=self.hide_possib)
+        self._tgrid = TGrid(self,hide_possib=self.hide_possib)
+
+    def _create_menu(self):
+        self.menu = tki.Menu(self.master)
+        self.master.config(menu=self.menu)
+
+        filemenu = tki.Menu(self.menu)
+        self.menu.add_cascade(label="File", menu=filemenu)
+        filemenu.add_command(label="New", command=self._do_new)
 
     def _create_buttons_frame(self,buttonsFrame):
 
@@ -289,24 +297,36 @@ class Sudoku(object):
         else:
             self._grid.copy_values_from(solution)
 
+    def _do_new(self):
+        print "New"
+
     def _do_test(self):
         gettext.translation("alssudoku","locales",("ca",)).install(True)
         self._create_buttons_frame(self.buttonsFrame)
 
+
+class SudokuApp(tki.Tk):
+    """main tki.Tk App"""
+    def __init__(self):
+        tki.Tk.__init__(self)
+        self.resizable(0,0)
+        self.title("tkSudoku")
+        Sudoku(self)
+
+
 if __name__ == "__main__":
     # open log
+    redirect = True
     import sys,sdlogger
-    log = sdlogger.mlog(sys.stdout,"stdout.log","w")
-    logerr = sdlogger.mlog(sys.stderr,"stderr.log","w")
-    old_stdout = sys.stdout
-    old_stderr = sys.stderr
-    sys.stdout=log
-    sys.stderr=logerr
+    if redirect:
+        log = sdlogger.mlog(sys.stdout,"stdout.log","w")
+        logerr = sdlogger.mlog(sys.stderr,"stderr.log","w")
+        old_stdout = sys.stdout
+        old_stderr = sys.stderr
+        sys.stdout=log
+        sys.stderr=logerr
     try:
-        root = tki.Tk()
-        root.resizable(0,0)
-        root.title("tkSudoku")
-        Sudoku(root)
+        root = SudokuApp()
         root.mainloop()
     except:
         import traceback
@@ -314,11 +334,11 @@ if __name__ == "__main__":
         traceback.print_exc(file=trace)
         trace.close()
         traceback.print_exc(file=sys.stderr)
-        import wx
-        app=wx.App(redirect=False)
-        wx.MessageBox(traceback.format_exc(),"Traceback",wx.ICON_ERROR)
+        from tkMessageBox import showerror
+        showerror("Traceback",traceback.format_exc())
     # close log
-    sys.stdout=old_stdout
-    sys.stderr=old_stderr
-    log.close()
-    logerr.close()
+    if redirect:
+        sys.stdout=old_stdout
+        sys.stderr=old_stderr
+        log.close()
+        logerr.close()
