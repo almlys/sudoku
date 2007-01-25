@@ -55,18 +55,11 @@
 
 """A Sudoku Solver"""
 
-try:
-    set
-except NameError:
-    from sets import Set as set
-from copy import deepcopy
 import Tkinter as tki
 import tkFont
-from Sudoku import Grid, Cell, rc2i, i2r, i2c, rc2b, Contradiction, solve
-from observer import Observer, Subject
-import gettext
-gettext.install("alssudoku","locales",True)
-
+import Sudoku
+import observer
+import BaseApp
 
 # View classes
 
@@ -84,7 +77,7 @@ class TGrid(object):
         self._widget.pack()
 
     def _make_tcell(self, row, col, hide_possib):
-        background = ("#cb83ac","#cb9eac")[rc2b(row, col) % 2],
+        background = ("#cb83ac","#cb9eac")[Sudoku.rc2b(row, col) % 2],
         tcell = TCell(row,
                       col,
                       self._focus,
@@ -101,11 +94,11 @@ class TGrid(object):
     def focus_set(self, *args):
         self._tcells[self._focus.get()]._value_entry.focus_set()
      
-class TCell(Observer):
+class TCell(observer.Observer):
     """A TCells is the view of a Sudoku's cell"""
     
     def __init__(self, row, col, focus, master, bg, hide_possib):
-        Observer.__init__(self)
+        observer.Observer.__init__(self)
         self._widget = tki.Frame(master, bg=bg)
 
         self._possibls = tki.StringVar()
@@ -180,82 +173,163 @@ class TCell(Observer):
         
 # Glue with the model
 
-class MyGrid(Grid):
+class MyGrid(Sudoku.Grid):
 
     def _make_cells(self):
         return [MyCell(self, index) for index in xrange(81)]
         
-class MyCell(Cell, Subject):
+class MyCell(Sudoku.Cell, observer.Subject):
 
     def __init__(self, grid, index):
-        Cell.__init__(self)
-        Subject.__init__(self)
+        Sudoku.Cell.__init__(self)
+        observer.Subject.__init__(self)
         self._grid  = grid
         self._index = index
         
     def reset(self):
-        Cell.reset(self)
+        Sudoku.Cell.reset(self)
         self.notify()
         
     def set(self, value):
-        Cell.set(self, value)
+        Sudoku.Cell.set(self, value)
         self.notify()
 
     def markImpossible(self,value):
-        Cell.markImpossible(self, value)
+        Sudoku.Cell.markImpossible(self, value)
         self.notify()
+
+
+class StatusBar(tki.Frame):
+    """Status Bar for our app"""
+
+    def __init__(self,master):
+        tki.Frame.__init__(self,master)
+        self.label = tki.Label(self,bd=1,relief=tki.SUNKEN,anchor=tki.W)
+        self.label.pack(fill=tki.X)
+
+    def set(self,val):
+        self.label.config(text=val)
+        self.label.update_idletasks()
+
+    def clear(self):
+        self.label.config(text="")
+        self.label.update_idletasks()
+
 
 # Controller class 
 
-class Sudoku(tki.Frame):
+class SudokuFrame(tki.Frame):
     """Application class"""
     
-    def __init__(self, master):
-        tki.Frame.__init__(self,master)
+    def __init__(self, app):
+        tki.Frame.__init__(self,app.root)
+        self.app=app
+        self._bind_callbacks()
+        self._create_tki_vars()
         self._create_view()
         self._create_model()
         self._connect()
 
+    def _bind_callbacks(self):
+        self.master.protocol("WM_DELETE_WINDOW", self._do_exit)
+
+    def _create_tki_vars(self):
+        self.hide_possib = tki.IntVar()
+        self.hide_possib.set(0)
+        self.app_language = tki.StringVar()
+        self.app_language.set(self.app.GetLanguage())
+        self.app_language.trace_variable("w",self._do_changeLanguage)
+
     def _create_view(self):
         self.pack()
         self._create_menu()
-        
-        self.buttonsFrame = tki.Frame(self)
-        self.buttonsFrame.pack()
-
-        self._create_buttons_frame(self.buttonsFrame)
-        
-        self._tgrid = TGrid(self,hide_possib=self.hide_possib)
+        self._create_3layout()
+        self._create_toolbar()
+        self._create_sudoku()
+        self._create_statusBar()
 
     def _create_menu(self):
+        try:
+            self.menu.destroy()
+        except AttributeError:
+            pass
         self.menu = tki.Menu(self.master)
         self.master.config(menu=self.menu)
 
         filemenu = tki.Menu(self.menu)
-        self.menu.add_cascade(label="File", menu=filemenu)
-        filemenu.add_command(label="New", command=self._do_new)
+        self.menu.add_cascade(label=_("File"), menu=filemenu)
+        filemenu.add_command(label=_("New..."), command=self._do_new)
+        filemenu.add_command(label=_("Open..."), command=self._do_loadFromFile)
+        filemenu.add_command(label=_("Open URL..."), command=self._do_loadFromURL)
+        #filemenu.add_command(label=_("Save..."), command=self._do_save)
+        filemenu.add_separator()
+        filemenu.add_command(label=_("Exit"), command=self._do_exit)
 
-    def _create_buttons_frame(self,buttonsFrame):
+        sudomenu = tki.Menu(self.menu)
+        self.menu.add_cascade(label=_("Sudoku"), menu=sudomenu)
+        sudomenu.add_command(label=_("Solve"), command=self._do_solve)
+        sudomenu.add_separator()
+        sudomenu.add_command(label=_("Undo"), command=self._do_undo, state=tki.DISABLED)
+        sudomenu.add_command(label=_("Redo"), command=self._do_redo, state=tki.DISABLED)
 
-        tki.Button(buttonsFrame,
+        optsmenu=tki.Menu(self.menu)
+        self.menu.add_cascade(label=_("Options"), menu=optsmenu)
+        optsmenu.add_checkbutton(label=_("Show Hints"), variable=self.hide_possib)
+
+        langmenu=tki.Menu(optsmenu)
+        optsmenu.add_cascade(label=_("Change Language"), menu=langmenu)
+
+        tmplglist=[]
+        for k,l in self.app.GetLanguages().iteritems():
+            tmplglist.append((_(l),k))
+        tmplglist.sort()
+        
+        for lan,k in tmplglist:
+            langmenu.add_radiobutton(label=lan, variable=self.app_language, value=k)
+
+        helpmenu=tki.Menu(self.menu)
+        self.menu.add_cascade(label=_("Help"), menu=helpmenu)
+        #helpmenu.add_command(label=_("Help"), command=self._do_help)
+        #helpmenu.add_command(label=_("Check for updates..."), command=self._do_checkForUpdates)
+        #helpmenu.add_command(label=_("Console..."), command=self._do_console)
+        helpmenu.add_command(label=_("About..."), command=self._do_about)
+
+    def _create_3layout(self):
+        self.lToolBar = tki.Frame(self)
+        self.lToolBar.pack()
+        self.lSudokuGrid = tki.Frame(self)
+        self.lSudokuGrid.pack()
+        self.lStatusBar = tki.Frame(self)
+        self.lStatusBar.pack(side=tki.BOTTOM,fill=tki.X)
+
+    def _create_toolbar(self):
+        try:
+            self.ToolBar.destroy()
+        except AttributeError:
+            pass
+
+        self.ToolBar = tki.Frame(self.lToolBar)
+        self.ToolBar.pack()
+
+        tki.Button(self.ToolBar,
                    text=_("Load"),
                    command=self._do_loadFromFile).pack(side=tki.LEFT)
 
-        tki.Button(buttonsFrame,
+        tki.Button(self.ToolBar,
                    text=_("Solve"),
                    command=self._do_solve).pack(side=tki.LEFT)
 
-        tki.Button(buttonsFrame,
-                   text=_("Test"),
-                   command=self._do_test).pack(side=tki.LEFT)
-
-        
-        self.hide_possib = tki.IntVar()
-        self.hide_possib.set(0)
-        tki.Checkbutton(buttonsFrame,
+        tki.Checkbutton(self.ToolBar,
                         text=_("Show Hints"),
                         variable=self.hide_possib).pack(side=tki.LEFT)
-        
+
+    def _create_sudoku(self):
+        self._tgrid = TGrid(self.lSudokuGrid,hide_possib=self.hide_possib)
+
+    def _create_statusBar(self):
+        self.StatusBar = StatusBar(self.lStatusBar)
+        self.StatusBar.pack(side=tki.BOTTOM,fill=tki.X)
+        #self.StatusBar.set(_("Idle"))
 
     def _create_model(self):
         self._grid = MyGrid()
@@ -268,6 +342,15 @@ class Sudoku(tki.Frame):
             mcell.notify()
 
     # Actions
+
+    def _do_exit(self):
+        from tkMessageBox import askokcancel
+        if askokcancel(title=_("Are you sure?"),
+                                    message=_("Are you really sure that you wish to quit?")):
+            self.master.destroy()
+
+    def _do_new(self):
+        print "New"
     
     def _do_loadFromFile(self):
         # TODO: Check errors !!!
@@ -276,42 +359,101 @@ class Sudoku(tki.Frame):
                                                 (_("TSudoku files"),"*.tsdk"),
                                                 (_("All Files"), "*")))
         if not isinstance(filename, basestring): return # Exit if Cancel or Closed
+        self.StatusBar.set(_("Opening %s, please wait...") %(filename,))
         try:
-            grid=Grid()
+            grid=Sudoku.Grid()
             grid.load_from_file(filename)
             self._grid.copy_values_from(grid)
-        except Contradiction: # Dialog guarantees filename exists
+        except Sudoku.Contradiction: # Dialog guarantees filename exists
             from tkMessageBox import showinfo
             showinfo(message=_("Invalid sudoku file"))
+        self.StatusBar.set("")
+
+    def _do_loadFromURL(self):
+        print "open url"
+        from tkSimpleDialog import askstring
+        filename = askstring(_("Enter the URL"),_("Enter the URL"),
+                             initialvalue="http://sudoku.udl.es/Problems/Easy-4-1.gpe")
+        if not isinstance(filename, basestring): return
+        self.StatusBar.set(_("Opening %s, please wait...") % (filename,))
+        import urllib2 as urllib
+        from tkMessageBox import showinfo
+        try:
+            f=urllib.urlopen(filename)
+            grid=Sudoku.Grid()
+            if filename.lower().endswith(".gpe"):
+                ftype="gpe"
+            else:
+                ftype="tsdk"
+            grid.load_from_stream(f,ftype)
+            self._grid.copy_values_from(grid)
+            f.close()
+        except Sudoku.Contradiction:
+            f.close()
+            showinfo(message=_("Invalid sudoku file"),title=_("Invalid sudoku file"))
+        except urllib.HTTPError,detail:
+            showinfo(message=_("The server said:\n%s\nRequesting the %s resource") %(detail,filename),
+                          title=_("Remote server error"))
+        except (urllib.URLError,ValueError),detail:
+            showinfo(_("Cannot open %s, reason %s") %(filename,detail))
+        self.StatusBar.set("")
+
 
     def _do_solve(self):
+        self.StatusBar.set(_("Solving Sudoku, please wait...."))
         try:
-            grid = Grid()
+            grid = Sudoku.Grid()
             grid.copy_values_from(self._grid)
-            solution = solve(grid)
-        except Contradiction:
+            solution = Sudoku.solve(grid)
+        except Sudoku.Contradiction:
             solution = None
         if solution is None:
             from tkMessageBox import showinfo
             showinfo(message=_("No solution has been found."))
         else:
             self._grid.copy_values_from(solution)
+        self.StatusBar.set("")
 
-    def _do_new(self):
-        print "New"
+    def _do_undo(self):
+        print "undo"
+        self._grid.undo()
 
-    def _do_test(self):
-        gettext.translation("alssudoku","locales",("ca",)).install(True)
-        self._create_buttons_frame(self.buttonsFrame)
+    def _do_redo(self):
+        print "redo"
+        self._grid.redo()
+
+    def _do_changeLanguage(self, *args):
+        print "change language %s" %(self.app_language.get())
+        self.app.SetLanguage(self.app_language.get())
+        self._create_menu()
+        self._create_toolbar()
+
+    def _do_about(self):
+        from tkMessageBox import showinfo
+        m,t=self.app.GetAboutMessage()
+        showinfo(message=m,title=t)
 
 
-class SudokuApp(tki.Tk):
+class SudokuApp(BaseApp.BaseApplication):
     """main tki.Tk App"""
+
     def __init__(self):
-        tki.Tk.__init__(self)
-        self.resizable(0,0)
-        self.title("tkSudoku")
-        Sudoku(self)
+        BaseApp.BaseApplication.__init__(self,config="alsSudoku.cfg")
+        self._loadConfig()
+        self._installGettext()
+        self.root=tki.Tk()
+        self.root.resizable(0,0)
+        self.root.title("tkSudoku")
+        SudokuFrame(self)
+
+    def GetAppVersion(self):
+        return "$Id$"
+        
+    def MainLoop(self):
+        self.root.mainloop()
+        
+    def __del__(self):
+        self._saveConfig()
 
 
 if __name__ == "__main__":
@@ -327,7 +469,8 @@ if __name__ == "__main__":
         sys.stderr=logerr
     try:
         root = SudokuApp()
-        root.mainloop()
+        root.MainLoop()
+        del root
     except:
         import traceback
         trace=file("traceback.log","w")

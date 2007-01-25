@@ -25,7 +25,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: $Id$\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-01-14 16:01+0100\n"
+"POT-Creation-Date: 2007-01-24 20:07+0100\n"
 "PO-Revision-Date: 2007-01-10 00:56+0100\n"
 "Last-Translator: Alberto Montañola Lacort <alberto@almlys.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,152 +33,216 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: wxSudoku.py:137
+#: wxSudoku.py:40
+msgid ""
+"\n"
+"WxPython 2.6 or higher is required to run this application!!!\n"
+"\n"
+"You can get it from http://www.wxpython.org\n"
+"\n"
+"Or you can just type as root \"apt-get install python-wxgtk2.6\" on Debian, "
+"Ubuntu and any other Debian based distros\n"
+"On other distros you may try similar commands, yum, urpmi, emerge,..., just "
+"check your Distro documentation\n"
+"but if you don't have root access you will need to manually install wxPython "
+"in your home directory, have fun!\n"
+msgstr ""
+
+#: wxSudoku.py:343
 msgid "Creates a New Sudoku"
 msgstr ""
 
-#: wxSudoku.py:137
+#: wxSudoku.py:343
 msgid "Opens a Sudoku"
 msgstr ""
 
-#: wxSudoku.py:138
+#: wxSudoku.py:344
+msgid "Opens a Sudoku from a Web server"
+msgstr ""
+
+#: wxSudoku.py:345
 msgid "Saves a Sudoku"
 msgstr ""
 
-#: wxSudoku.py:138
+#: wxSudoku.py:345
 msgid "The application terminates"
 msgstr ""
 
-#: wxSudoku.py:139
+#: wxSudoku.py:346
 msgid "Solves the Sudoku (I thought that you were smart!)"
 msgstr ""
 
-#: wxSudoku.py:140
+#: wxSudoku.py:347
 msgid "Goes back to the past, well, it undoes your latest mess"
 msgstr ""
 
-#: wxSudoku.py:141
+#: wxSudoku.py:348
 msgid "Redoes your latest undo"
 msgstr ""
 
-#: wxSudoku.py:142
+#: wxSudoku.py:349
 msgid "It shows you some helpful information"
 msgstr ""
 
-#: wxSudoku.py:143
+#: wxSudoku.py:350
 #, python-format
 msgid "Changes your app language to %s"
 msgstr ""
 
-#: wxSudoku.py:144
+#: wxSudoku.py:351
 msgid "It allows you to change the language"
 msgstr ""
 
-#: wxSudoku.py:145
+#: wxSudoku.py:352
 msgid "Shows some documentation of how does work this thing"
 msgstr ""
 
-#: wxSudoku.py:146
+#: wxSudoku.py:353
 msgid "Checks if you are running the latest version"
 msgstr ""
 
-#: wxSudoku.py:147
+#: wxSudoku.py:354
 msgid "I need to explain what does this thing do?"
 msgstr ""
 
-#: wxSudoku.py:148
+#: wxSudoku.py:355
 msgid "Opens a Python Interactive console, It's that cool"
 msgstr ""
 
-#: wxSudoku.py:175
+#: wxSudoku.py:389
 msgid "&New..."
 msgstr ""
 
-#: wxSudoku.py:180
+#: wxSudoku.py:394
 msgid "&Open..."
 msgstr ""
 
-#: wxSudoku.py:191
+#: wxSudoku.py:399
+msgid "&Open URL..."
+msgstr ""
+
+#: wxSudoku.py:411
 msgid "&Exit"
 msgstr ""
 
-#: wxSudoku.py:196
+#: wxSudoku.py:416
 msgid "&File"
 msgstr ""
 
-#: wxSudoku.py:200
+#: wxSudoku.py:420
 msgid "&Solve"
 msgstr ""
 
-#: wxSudoku.py:206
+#: wxSudoku.py:426
 msgid "&Undo"
 msgstr ""
 
-#: wxSudoku.py:212
+#: wxSudoku.py:432
 msgid "&Redo"
 msgstr ""
 
-#: wxSudoku.py:218
+#: wxSudoku.py:438
 msgid "&Sudoku"
 msgstr ""
 
-#: wxSudoku.py:222
+#: wxSudoku.py:442
 msgid "&Show Hints"
 msgstr ""
 
-#: wxSudoku.py:241
+#: wxSudoku.py:461
 msgid "&Change Language"
 msgstr ""
 
-#: wxSudoku.py:242
+#: wxSudoku.py:462
 msgid "&Options"
 msgstr ""
 
-#: wxSudoku.py:258
+#: wxSudoku.py:478
 msgid "&Console..."
 msgstr ""
 
-#: wxSudoku.py:264
+#: wxSudoku.py:484
 msgid "&About..."
 msgstr ""
 
-#: wxSudoku.py:268
+#: wxSudoku.py:488
 msgid "&Help"
 msgstr ""
 
-#: wxSudoku.py:276
+#: wxSudoku.py:498 tkSudoku.py:261
 msgid "New..."
 msgstr ""
 
-#: wxSudoku.py:278
+#: wxSudoku.py:500 tkSudoku.py:262
 msgid "Open..."
 msgstr ""
 
-#: wxSudoku.py:283 tkSudoku.py:238
+#: wxSudoku.py:505 tkSudoku.py:269 tkSudoku.py:312
 msgid "Solve"
 msgstr ""
 
-#: wxSudoku.py:286
+#: wxSudoku.py:508 tkSudoku.py:271
 msgid "Undo"
 msgstr ""
 
-#: wxSudoku.py:290
+#: wxSudoku.py:512 tkSudoku.py:272
 msgid "Redo"
 msgstr ""
 
-#: wxSudoku.py:295 tkSudoku.py:249
+#: wxSudoku.py:517 tkSudoku.py:276 tkSudoku.py:316
 msgid "Show Hints"
 msgstr ""
 
-#: wxSudoku.py:324
+#: wxSudoku.py:550
 msgid "Are you really sure that you wish to quit?"
 msgstr ""
 
-#: wxSudoku.py:324
+#: wxSudoku.py:550
 msgid "Are you sure?"
 msgstr ""
 
-#: wxSudoku.py:361
+#: wxSudoku.py:564 tkSudoku.py:348
+msgid "GPE files"
+msgstr ""
+
+#: wxSudoku.py:565 tkSudoku.py:349
+msgid "TSudoku files"
+msgstr ""
+
+#: wxSudoku.py:566 tkSudoku.py:350
+msgid "All Files"
+msgstr ""
+
+#: wxSudoku.py:574 wxSudoku.py:596 tkSudoku.py:358
+msgid "Invalid sudoku file"
+msgstr ""
+
+#: wxSudoku.py:580
+msgid "Enter the URL"
+msgstr ""
+
+#: wxSudoku.py:599
+#, python-format
+msgid ""
+"The server said:\n"
+"%s\n"
+"Requesting the %s resource"
+msgstr ""
+
+#: wxSudoku.py:600
+msgid "Remote server error"
+msgstr ""
+
+#: wxSudoku.py:603
+#, python-format
+msgid "Cannot open %s, reason %s"
+msgstr ""
+
+#: wxSudoku.py:610 tkSudoku.py:372
+msgid "No solution has been found."
+msgstr ""
+
+#: wxSudoku.py:641
 #, python-format
 msgid ""
 "\n"
@@ -202,47 +266,47 @@ msgid ""
 "\n"
 msgstr ""
 
-#: wxSudoku.py:380
+#: wxSudoku.py:660
 #, python-format
 msgid "About %s"
 msgstr ""
 
-#: wxSudoku.py:442
-msgid "English"
+#: tkSudoku.py:260
+msgid "File"
 msgstr ""
 
-#: wxSudoku.py:442
-msgid "Spanish"
+#: tkSudoku.py:263
+msgid "Open URL..."
 msgstr ""
 
-#: wxSudoku.py:442
-msgid "Catalan"
-msgstr ""
-
-#: tkSudoku.py:234
-msgid "Load"
-msgstr ""
-
-#: tkSudoku.py:242
-msgid "Test"
+#: tkSudoku.py:265
+msgid "Exit"
 msgstr ""
 
 #: tkSudoku.py:268
-msgid "GPE files"
+msgid "Sudoku"
 msgstr ""
 
-#: tkSudoku.py:269
-msgid "TSudoku files"
+#: tkSudoku.py:275
+msgid "Options"
 msgstr ""
 
-#: tkSudoku.py:270
-msgid "All Files"
+#: tkSudoku.py:279
+msgid "Change Language"
 msgstr ""
 
-#: tkSudoku.py:278
-msgid "Invalid sudoku file"
+#: tkSudoku.py:308
+msgid "Load"
 msgstr ""
 
-#: tkSudoku.py:289
-msgid "No solution has been found."
+#: BaseApp.py:107
+msgid "English"
+msgstr ""
+
+#: BaseApp.py:107
+msgid "Spanish"
+msgstr ""
+
+#: BaseApp.py:107
+msgid "Catalan"
 msgstr ""

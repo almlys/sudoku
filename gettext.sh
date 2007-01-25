@@ -1,6 +1,6 @@
 #!/bin/sh
 
-FILES="wxSudoku.py Sudoku.py tkSudoku.py"
+FILES="wxSudoku.py Sudoku.py tkSudoku.py BaseApp.py"
 xgettext -o sudoku.po $FILES
 mv en.po en.po.bak
 mv ca.po ca.po.bak

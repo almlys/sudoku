@@ -27,22 +27,28 @@
 
 """A Sudoku Solver"""
 
+import BaseApp
+import Sudoku
+import observer
+
 try:
     import wx
 except ImportError:
-    print "WxPython 2.6 or higher is required to run this application!!!"
-    print
-    print "You can get it from http://www.wxpython.org"
-    print "Or you can just type as root \"apt-get install python-wxgtk2.6\" on Debian, Ubuntu and any other Debian based distros"
-    print "On other distros you may try similar commands, yum, urpmi, emerge,..., just check your Distro documentation"
-    print "but if you don't have root access you will need to manually install wxPython in your home directory, have fun!"
+    # Show a localized Import error
+    a=BaseApp.BaseApplication()
+    a._installGettext()
+    print _("""
+WxPython 2.6 or higher is required to run this application!!!
+
+You can get it from http://www.wxpython.org
+
+Or you can just type as root "apt-get install python-wxgtk2.6" on Debian, Ubuntu and any other Debian based distros
+On other distros you may try similar commands, yum, urpmi, emerge,..., just check your Distro documentation
+but if you don't have root access you will need to manually install wxPython in your home directory, have fun!\n""")
     #import webbrowser
     #webbrowser.open_new("http://www.wxpython.org")
     import sys
     sys.exit(-1)
-import gettext
-import Sudoku
-import observer
 
 # Glue with the model
 
@@ -541,7 +547,8 @@ class SudokuMainFrame(wx.Frame):
 
     def OnExit(self,evt):
         if type(evt)!=wx.CloseEvent or evt.CanVeto():
-            ans=wx.MessageBox(_("Are you really sure that you wish to quit?"),_("Are you sure?"),wx.YES_NO)
+            ans=wx.MessageBox(_("Are you really sure that you wish to quit?"),
+                              _("Are you sure?"),wx.YES_NO,self)
             if ans!=wx.YES:
                 if type(evt)==wx.CloseEvent:
                     evt.Veto()
@@ -560,20 +567,25 @@ class SudokuMainFrame(wx.Frame):
             _("All Files"), "|*"
             )),style=wx.OPEN)
         if dlg.ShowModal()==wx.ID_OK:
+            filep=dlg.GetDirectory() + "/" + dlg.GetFilename()
+            self.SetStatusText(_("Opening %s, please wait...") % (filep,))
+            self.app.Yield()
             try:
                 grid=Sudoku.Grid()
-                grid.load_from_file(dlg.GetDirectory() + "/" + dlg.GetFilename())
+                grid.load_from_file(filep)
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
             except Sudoku.Contradiction:
                 wx.MessageBox(_("Invalid sudoku file"),_("Invalid sudoku file"),
                               style=wx.ICON_INFORMATION)
         dlg.Destroy()
+        self.SetStatusText("")
 
     def OnOpenURL(self,evt):
-        print "open url"
-        dlg=wx.TextEntryDialog(self,_("Enter the URL"),
+        dlg=wx.TextEntryDialog(self,_("Enter the URL"),_("Enter the URL"),
                                defaultValue="http://sudoku.udl.es/Problems/Easy-4-1.gpe")
         if dlg.ShowModal() == wx.ID_OK:
+            self.SetStatusText(_("Opening %s, please wait...") % (dlg.GetValue(),))
+            self.app.Yield()
             import urllib2 as urllib
             try:
                 f=urllib.urlopen(dlg.GetValue())
@@ -596,12 +608,16 @@ class SudokuMainFrame(wx.Frame):
             except (urllib.URLError,ValueError),detail:
                 wx.MessageBox(_("Cannot open %s, reason %s") %(dlg.GetValue(),detail))
         dlg.Destroy()
+        self.SetStatusText("")
         
 
     def OnSolve(self,evt):
-        print "solve"
+        self.SetStatusText(_("Solving Sudoku, please wait...."))
+        self.app.Yield()
+        
         if not self.SudokuGrid.Solve():
             wx.MessageBox(_("No solution has been found."),style=wx.ICON_INFORMATION)
+        self.SetStatusText("")
 
     def OnUndo(self,evt):
         print "undo"
@@ -632,26 +648,8 @@ class SudokuMainFrame(wx.Frame):
         self._addToolBar()
 
     def OnAbout(self,evt):
-        wx.MessageBox(_(u"""
-Al's WxWidgets Python Sudoku.
-Another Sudoku solver, written 100%% in Python and wxWidgets.
-
-Version: %s
-
-Original Author: Copyright (c) 2006 Juan Manuel Gimeno Illa
-Current Author: Copyright (C) 2007 Alberto Montañola Lacort
-
-This program is free software; you can redistribute it and/or\
- modify it under the terms of the GNU General Public License as\
- published by the Free Software Foundation; either version 2 of\
- the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,\
- but WITHOUT ANY WARRANTY; without even the implied warranty of\
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\
- See the GNU General Public License for more details.
-
-""") %("$Id$",),_("About %s") %("Al's WxWidgets Python Sudoku",),wx.OK)
+        m,t = self.app.GetAboutMessage()
+        wx.MessageBox(m,t,wx.OK,self)
 
     def OnConsole(self,evt):
         try:
@@ -659,92 +657,34 @@ This program is distributed in the hope that it will be useful,\
             self.shellframe=None
         except: # wx.PyDeadObjectError:
             try:
-                print "Launching Shell..."
+                print _("Launching Shell...")
                 from wx import py
                 self.shellframe=py.crust.CrustFrame()
                 self.shellframe.Show()
                 self.shellframe.shell.interp.locals['app']=self.app
             except Exception, detail:
-                print "Failed launching shell, reason %s" %(detail,)
+                print _("Failed launching shell, reason %s") %(detail,)
         
 
-class SudokuApp(wx.App):
+class SudokuApp(wx.App,BaseApp.BaseApplication):
     """main wxApp"""
 
-    def __init__(self,config="wxSudoku.cfg"):
-        self.__configFile=config
-        self.config=None
+    def __init__(self,config="alsSudoku.cfg"):
+        BaseApp.BaseApplication.__init__(self,config)
         wx.App.__init__(self,redirect=False)
 
-    def _loadConfig(self,cfg=None):
-        """Load App configuration"""
-        import ConfigParser
-        if cfg==None:
-            cfg=self.__configFile
-        self.config=ConfigParser.SafeConfigParser()
-        self.config.add_section("global")
+    def _setConfigDefaults(self):
+        """Set App default configuration"""
+        BaseApp.BaseApplication._setConfigDefaults(self)
         self.config.set("global","gui.icon","favicon.ico")
-        self.config.set("global","app.gettext.locales","locales")
-        self.config.set("global","app.gettext.domain","alssudoku")
-        if cfg!=None:
-            self.config.read(cfg)
 
-    def _saveConfig(self,cfg=None):
-        """Save App configuration"""
-        if cfg==None:
-            cfg=self.__configFile
-        fo=file(cfg,"w")
-        self.config.write(fo)
-        fo.close()
-
-    def _getcfg(self,section,key):
-        try:
-            return self.config.get(section,key)
-        except ConfigParser.NoOptionError:
-            return None
-
-    def _installGettext(self,lang=None):
-        if lang==None:
-            gettext.install(self._getcfg("global","app.gettext.domain"),
-                            self._getcfg("global","app.gettext.locales"),True)
-        else:
-            gettext.translation(self._getcfg("global","app.gettext.domain"),
-                                self._getcfg("global","app.gettext.locales"),(lang,)).install(True)
+    def GetAppVersion(self):
+        return "$Id$"
 
     def _showMainFrame(self):
         self.mainFrame=SudokuMainFrame(self)
         self.SetTopWindow(self.mainFrame)
         self.mainFrame.Show(True)
-
-    def GetLanguages(self):
-        try:
-            return self.__Languages
-        except:
-            import dircache
-            self.__Languages={}
-            # Dirty hardcoded ugly LangDict
-            _ = lambda x : x
-            LangDict={"en":_("English"),"es":_("Spanish"),"ca":_("Catalan")}
-            for lan in dircache.listdir(self._getcfg("global","app.locales")):
-                if lan in LangDict:
-                    self.__Languages[lan]=LangDict[lan]
-                else:
-                    self.__Languages[lan]=lan
-            return self.__Languages
-
-    def SetLanguage(self,lang):
-        #import locale
-        #locale.setlocale(locale.LC_ALL, (lang,"utf-8"))
-        self.__Language=lang
-        self._installGettext(lang)
-
-    def GetLanguage(self):
-        try:
-            return self.__Language
-        except:
-            import locale
-            self.__Language=locale.getdefaultlocale()[0][:2]
-            return self.__Language
 
     def OnInit(self):
         self._loadConfig()
