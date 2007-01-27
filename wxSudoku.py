@@ -72,7 +72,7 @@ class CellPanel(wx.Panel,observer.Observer):
         #self.SetSizer(szb)
         self.SetSizer(self._sizer)
         self.HintsLabel=wx.StaticText(self,style=wx.ALIGN_CENTER)
-        self.HintsLabel.SetLabel("123456789")
+        #self.HintsLabel.SetLabel("123456789")
         self.HintsLabel.SetFont(wx.FFont(9,wx.FONTFAMILY_DEFAULT,face="Arial"))
         self._sizer.Add(self.HintsLabel,0,flag=wx.ALIGN_CENTER)
         self.TextBox=wx.TextCtrl(self,value="%i,%i" %(self.row,self.col),size=(-1,-1),style=wx.TE_PROCESS_ENTER | wx.NO_BORDER | wx.TE_CENTRE)
@@ -104,16 +104,23 @@ class CellPanel(wx.Panel,observer.Observer):
     def OnKey(self,evt):
         #print evt
         code=evt.GetKeyCode()
+        r,c = self.row, self.col
+        grid = self.getSubject()._grid
         if code==wx.WXK_UP:
             print "UP"
+            r = (r-1) % grid.getTotalNumRows()
         elif code==wx.WXK_DOWN:
             print "DOWN"
+            r = (r+1) % grid.getTotalNumRows()
         elif code==wx.WXK_RIGHT:
             print "RIGHT"
+            c = (c+1) % grid.getTotalNumCols()
         elif code==wx.WXK_LEFT:
             print "LEFT"
+            c = (c-1) % grid.getTotalNumCols()
         else:
             evt.Skip()
+        self.parent.SetFocus(grid.rc2i(r,c))
 
     def OnChange(self,evt):
         """The entry has changed so we must notify the model."""
@@ -123,6 +130,8 @@ class CellPanel(wx.Panel,observer.Observer):
             new_value = int(self.TextBox.GetValue())
         except ValueError:
             new_value = 0
+        if new_value == 0:
+            self.TextBox.SetValue("")
         if new_value == old_value:
             return
 
@@ -141,6 +150,8 @@ class CellPanel(wx.Panel,observer.Observer):
             self.parent.parent.EnableRedo(False)
             self.parent.History.Stack([mcell._index,old_value,new_value])
 
+    def SetFocus(self):
+        self.TextBox.SetFocus()
 
 
 class SudokuGridPanel(wx.Panel):
@@ -152,7 +163,7 @@ class SudokuGridPanel(wx.Panel):
         wx.Panel.__init__(self,parentpanel,*args,**kwargs)
         self.parent=appparent
         self.SetBackgroundColour((48,7,11))
-        self._ShowHints=False
+        self._ShowHints=self.parent.ShowHints
         if type==None:
             type=Sudoku.NormalSudoku(3,3,3,3)
         self._type=type
@@ -246,6 +257,8 @@ class SudokuGridPanel(wx.Panel):
         if new!=0:
             self._ModelGrid.set(idx,new)
 
+    def SetFocus(self,idx):
+        self._ViewCells[idx].SetFocus()
 
 
 class SudokuMainFrame(wx.Frame):

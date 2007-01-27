@@ -109,7 +109,7 @@ class TCell(observer.Observer):
         if mcell._value == 0:
             new_value = ""
             # When model resets, we must re-enable entries
-            self._value_entry.config(state=tki.NORMAL)
+            #self._value_entry.config(state=tki.NORMAL)
         else:
             new_value = str(mcell._value)
             #self._value_entry.config(state=tki.DISABLED)
@@ -125,12 +125,29 @@ class TCell(observer.Observer):
     def on_change(self, event):
         """The entry has changed so we must notify the model."""
         mcell = self.getSubject()
-        #try:
-        new_value = int(self._value_var.get())
-        mcell._grid.set((i2r(mcell._index), i2c(mcell._index)), new_value)
-            #self._value_entry.config(state=tki.DISABLED)
-        #except (Contradiction, ValueError):
-        #    self._value_var.set("")
+        old_value = mcell._value
+        try:
+            new_value = int(self._value_var.get())
+        except ValueError:
+            new_value = 0
+        if new_value==0:
+            self._value_var.set("")
+        if new_value == old_value:
+            return
+
+        if old_value!=0:
+            mcell._grid.unset(mcell._index)
+        if new_value!=0:
+            try:
+                mcell._grid.set(mcell._index, new_value)
+            except Sudoku.Contradiction:
+                mcell._grid.unset(mcell._index)
+                new_value=0
+
+        #if new_value!=old_value:
+        #    EnableUndo(True)
+        #    EnableReod(False)
+        #    History.Stack([mcell._index,old_value,new_value])
 
     def on_move(self, event):
         key = event.keysym
@@ -139,7 +156,7 @@ class TCell(observer.Observer):
         elif key == "Down" : r = (r + 1) % 9
         elif key == "Left" : c = (c - 1) % 9
         elif key == "Right": c = (c + 1) % 9
-        self._focus.set(rc2i(r, c))
+        self._focus.set(self.getSubject()._grid.rc2i(r, c))
 
 
 class TGrid(object):
