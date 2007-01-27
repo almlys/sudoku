@@ -57,43 +57,13 @@
 
 import Tkinter as tki
 import tkFont
+import SudokuCommon
 import Sudoku
 import observer
-import BaseApp
+
 
 # View classes
 
-class TGrid(object):
-    """Represents the 9x9 grid formed by 3x3 Tboxes"""
-    def __init__(self, master, hide_possib):
-        self._widget = tki.Frame(master,
-                                 borderwidth=2,
-                                 relief=tki.GROOVE)
-        self._focus = tki.IntVar()
-        self._focus.trace_variable("w", self.focus_set)
-        self._tcells = [self._make_tcell(r, c, hide_possib)
-                        for r in xrange(9)
-                        for c in xrange(9)]
-        self._widget.pack()
-
-    def _make_tcell(self, row, col, hide_possib):
-        background = ("#cb83ac","#cb9eac")[Sudoku.rc2b(row, col) % 2],
-        tcell = TCell(row,
-                      col,
-                      self._focus,
-                      self._widget,
-                      background,
-                      hide_possib)
-        tcell._widget.grid(row=row, column=col)
-        return tcell
-    
-    def update(self):
-        for tcell in self._tcells:
-            tcell.instance().update()
-
-    def focus_set(self, *args):
-        self._tcells[self._focus.get()]._value_entry.focus_set()
-     
 class TCell(observer.Observer):
     """A TCells is the view of a Sudoku's cell"""
     
@@ -170,34 +140,40 @@ class TCell(observer.Observer):
         elif key == "Left" : c = (c - 1) % 9
         elif key == "Right": c = (c + 1) % 9
         self._focus.set(rc2i(r, c))
-        
-# Glue with the model
 
-class MyGrid(Sudoku.Grid):
 
-    def _make_cells(self):
-        return [MyCell(self, index) for index in xrange(81)]
-        
-class MyCell(Sudoku.Cell, observer.Subject):
+class TGrid(object):
+    """Represents the 9x9 grid formed by 3x3 Tboxes"""
+    def __init__(self, master, hide_possib):
+        self._widget = tki.Frame(master,
+                                 borderwidth=2,
+                                 relief=tki.GROOVE)
+        self._focus = tki.IntVar()
+        self._focus.trace_variable("w", self.focus_set)
+        self._tcells = [self._make_tcell(r, c, hide_possib)
+                        for r in xrange(9)
+                        for c in xrange(9)]
+        self._widget.pack()
 
-    def __init__(self, grid, index):
-        Sudoku.Cell.__init__(self)
-        observer.Subject.__init__(self)
-        self._grid  = grid
-        self._index = index
-        
-    def reset(self):
-        Sudoku.Cell.reset(self)
-        self.notify()
-        
-    def set(self, value):
-        Sudoku.Cell.set(self, value)
-        self.notify()
+    def _make_tcell(self, row, col, hide_possib):
+        #background = ("#cb83ac","#cb9eac")[Sudoku.rc2b(row, col) % 2],
+        background = ("#cb83ac","#cb9eac")[((row/3)*3 + (col/3)) % 2],
+        tcell = TCell(row,
+                      col,
+                      self._focus,
+                      self._widget,
+                      background,
+                      hide_possib)
+        tcell._widget.grid(row=row, column=col)
+        return tcell
+    
+    def update(self):
+        for tcell in self._tcells:
+            tcell.instance().update()
 
-    def markImpossible(self,value):
-        Sudoku.Cell.markImpossible(self, value)
-        self.notify()
-
+    def focus_set(self, *args):
+        self._tcells[self._focus.get()]._value_entry.focus_set()
+     
 
 class StatusBar(tki.Frame):
     """Status Bar for our app"""
@@ -332,7 +308,7 @@ class SudokuFrame(tki.Frame):
         #self.StatusBar.set(_("Idle"))
 
     def _create_model(self):
-        self._grid = MyGrid()
+        self._grid = SudokuCommon.MyGrid()
 
     def _connect(self):
         for index in xrange(81):
@@ -434,11 +410,11 @@ class SudokuFrame(tki.Frame):
         showinfo(message=m,title=t)
 
 
-class SudokuApp(BaseApp.BaseApplication):
+class SudokuApp(SudokuCommon.SudokuBaseApplication):
     """main tki.Tk App"""
 
     def __init__(self):
-        BaseApp.BaseApplication.__init__(self,config="alsSudoku.cfg")
+        SudokuCommon.SudokuBaseApplication.__init__(self,config="alsSudoku.cfg")
         self._loadConfig()
         self._installGettext()
         self.root=tki.Tk()

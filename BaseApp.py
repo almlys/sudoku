@@ -56,7 +56,7 @@ class MyConfigParser(ConfigParser.SafeConfigParser):
 
 class BaseApplication(object):
     """
-    Base Sudoku Aplication, with configuration stuff, etc...
+    Base Aplication, with configuration stuff, etc...
     Intended to be used with any type of GUI framework
     (Gtk, Qt, wxPython, Tk, CEGUI, etc...)
     """
@@ -80,8 +80,7 @@ class BaseApplication(object):
         Sets the configuration defaults
         Must be overrided
         """
-        self.config.set("global","app.gettext.locales","locales")
-        self.config.set("global","app.gettext.domain","alssudoku")
+        pass
 
     def _saveConfig(self,cfg=None):
         """Save App configuration"""
@@ -134,29 +133,6 @@ class BaseApplication(object):
             import locale
             self.__Language=locale.getdefaultlocale()[0][:2]
             return self.__Language
-
-    def GetAboutMessage(self):
-        return (_(u"""
-Al's WxWidgets Python Sudoku.
-Another Sudoku solver, written 100%% in Python and wxWidgets.
-
-Version: %s
-
-Original Author: Copyright (c) 2006 Juan Manuel Gimeno Illa
-Current Author: Copyright (C) 2007 Alberto Montañola Lacort
-
-This program is free software; you can redistribute it and/or\
- modify it under the terms of the GNU General Public License as\
- published by the Free Software Foundation; either version 2 of\
- the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,\
- but WITHOUT ANY WARRANTY; without even the implied warranty of\
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\
- See the GNU General Public License for more details.
-
-""") %(self.GetAppVersion(),),
-                      _("About %s") %("Al's WxWidgets Python Sudoku",))
 
     def GetAppVersion(self):
         return "$Id$"

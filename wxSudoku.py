@@ -27,7 +27,7 @@
 
 """A Sudoku Solver"""
 
-import BaseApp
+import SudokuCommon
 import Sudoku
 import observer
 
@@ -35,7 +35,7 @@ try:
     import wx
 except ImportError:
     # Show a localized Import error
-    a=BaseApp.BaseApplication()
+    a=SudokuCommon.SudokuBaseApplication()
     a._installGettext()
     print _("""
 WxPython 2.6 or higher is required to run this application!!!
@@ -49,75 +49,6 @@ but if you don't have root access you will need to manually install wxPython in 
     #webbrowser.open_new("http://www.wxpython.org")
     import sys
     sys.exit(-1)
-
-# Glue with the model
-
-class MyGrid(Sudoku.Grid):
-
-    def _make_cells(self):
-        return [MyCell(self, index) for index in xrange(81)]
-        
-class MyCell(Sudoku.Cell, observer.Subject):
-
-    def __init__(self, grid, index):
-        Sudoku.Cell.__init__(self)
-        observer.Subject.__init__(self)
-        self._grid  = grid
-        self._index = index
-
-    def reset(self):
-        Sudoku.Cell.reset(self)
-        self.notify()
-
-    def resetDomain(self):
-        Sudoku.Cell.resetDomain(self)
-        self.notify()
-
-    def set(self, value):
-        Sudoku.Cell.set(self, value)
-        self.notify()
-
-    def markImpossible(self,value):
-        Sudoku.Cell.markImpossible(self, value)
-        self.notify()
-
-
-class History(object):
-    """Handles the application History"""
-
-    def __init__(self):
-        self.undo=[]
-        self.redo=[]
-
-    def Stack(self,itm):
-        self.redo=[]
-        self.undo.append(itm)
-
-    def Undo(self):
-        try:
-            itm=self.undo.pop()
-            self.redo.append(itm)
-            return itm
-        except IndexError:
-            return None
-
-    def Redo(self):
-        try:
-            itm=self.redo.pop()
-            self.undo.append(itm)
-            return itm
-        except IndexError:
-            return None
-
-    def isEmpty(self):
-        return len(self.undo)==0
-
-    def isRedoEmpty(self):
-        return len(self.redo)==0
-
-    def Clear(self):
-        self.undo=[]
-        self.redo=[]
 
 
 # View classes
@@ -201,7 +132,8 @@ class CellPanel(wx.Panel,observer.Observer):
             try:
                 mcell._grid.set(mcell._index, new_value)
             except Sudoku.Contradiction:
-                self.TextBox.SetValue("")
+                mcell._grid.unset(mcell._index)
+                #self.TextBox.SetValue("")
                 new_value=0
 
         if new_value!=old_value:
@@ -214,17 +146,20 @@ class CellPanel(wx.Panel,observer.Observer):
 class SudokuGridPanel(wx.Panel):
     """Represents the 9x9 grid formed by 3x3 Tboxes"""
 
-    def __init__(self, appparent, parentpanel=None, *args, **kwargs):
+    def __init__(self, appparent, parentpanel=None, type=None, *args, **kwargs):
         if parentpanel==None:
             parentpanel=appparent
         wx.Panel.__init__(self,parentpanel,*args,**kwargs)
         self.parent=appparent
         self.SetBackgroundColour((48,7,11))
         self._ShowHints=False
-        self.sbr=3
-        self.sbc=3
-        self.r=3
-        self.c=3
+        if type==None:
+            type=Sudoku.NormalSudoku(3,3,3,3)
+        self._type=type
+        self.sbr=type.sbr
+        self.sbc=type.sbc
+        self.r=type.r
+        self.c=type.c
         self._initLayout()
         self._addHistory()
         self._create_model()
@@ -240,11 +175,14 @@ class SudokuGridPanel(wx.Panel):
         for r in xrange(self.r):
             for c in xrange(self.c):
                 flag=wx.ALL | wx.EXPAND
-                bgcolor = ((0xCB,0x83,0xAC),(0xCB,0x9E,0xAC))[(r*self.r + c) % 2]
+                ci=r*self.r + c
+                if self.c % 2 == 0 and r % 2:
+                    ci+=1
+                bgcolor = ((0xCB,0x83,0xAC),(0xCB,0x9E,0xAC))[ci % 2]
                 cgrid=wx.GridSizer(self.sbr,self.sbc)
                 self._GridSizer.Add(cgrid,1,border=1,flag=flag)
-                for br in xrange(self.sbc):
-                    for bc in xrange(self.sbr):
+                for br in xrange(self.sbr):
+                    for bc in xrange(self.sbc):
                         #itm=wx.TextCtrl(self,value="%i,%i" %(c*self.sbc + bc,r*self.sbr + br))s
                         itm=CellPanel(self,(r*self.sbr + br,c*self.sbc + bc),bgcolor)
                         cgrid.Add(itm,1,border=1,flag=wx.ALL | wx.EXPAND)
@@ -252,13 +190,13 @@ class SudokuGridPanel(wx.Panel):
                         self._ViewCells[(r*self.sbr + br) * self.sbc * self.c + c*self.sbc + bc]=itm
 
     def _addHistory(self):
-        self.History=History()
+        self.History=SudokuCommon.History()
 
     def _create_model(self):
-        self._ModelGrid=MyGrid()
+        self._ModelGrid=SudokuCommon.MyGrid(self._type)
 
     def _connect(self):
-        for idx in xrange(81):
+        for idx in xrange(len(self._ModelGrid)):
             mcell = self._ModelGrid._cells[idx]
             wcell = self._ViewCells[idx]
             mcell.attach(wcell)
@@ -271,7 +209,7 @@ class SudokuGridPanel(wx.Panel):
 
     def Solve(self):
         try:
-            grid = Sudoku.Grid()
+            grid = Sudoku.Grid(self._ModelGrid)
             grid.copy_values_from(self._ModelGrid)
             solution = Sudoku.solve(grid)
         except Sudoku.Contradiction:
@@ -329,7 +267,7 @@ class SudokuMainFrame(wx.Frame):
         self._addMenus()
         self._addSizer()
         self._addToolBar()
-        self._addSudoku()
+        self._addSudoku(Sudoku.NormalSudoku(3,3,3,3))
 
     def _loadAccessKeys(self):
         # Put here something that gets the access keys from the system configuration
@@ -522,9 +460,10 @@ class SudokuMainFrame(wx.Frame):
         self.Sizer.Remove(0)
         self.Sizer.Insert(0,self.ToolBar,flag=wx.EXPAND)
 
-    def _addSudoku(self):
+    def _addSudoku(self,type=None):
+        self.Sizer.Remove(1)
         if 1:
-            self.SudokuGrid=SudokuGridPanel(self)
+            self.SudokuGrid=SudokuGridPanel(self,type=type)
             self.Sizer.Insert(1,self.SudokuGrid,1,wx.EXPAND)
         else:
             panel=wx.ScrolledWindow(self)
@@ -534,7 +473,7 @@ class SudokuMainFrame(wx.Frame):
             self.Sizer.Insert(1,panel,1,wx.EXPAND)
             sizer=wx.GridSizer()
             panel.SetSizer(sizer)
-            self.SudokuGrid=SudokuGridPanel(self,panel)
+            self.SudokuGrid=SudokuGridPanel(self,panel,type)
             sizer.Add(self.SudokuGrid,0,wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL)
 
     def EnableUndo(self,enabled=True):
@@ -557,7 +496,25 @@ class SudokuMainFrame(wx.Frame):
 
     def OnNew(self,evt):
         print "new"
-        self.SudokuGrid.Reset()
+        #self.SudokuGrid.Reset()
+        import NewSudokuDialog
+        dlg=NewSudokuDialog.NewSudokuDialog(self)
+        dlg.ShowModal()
+        if dlg.OkStatus:
+            type=dlg.type.GetValue()
+            sbr=int(dlg.brows.GetValue())
+            sbc=int(dlg.bcols.GetValue())
+            c=sbr
+            r=sbc
+            if type==_("Samurai"):
+                su=Sudoku.SamuraiSudoku(r,c,sbr,sbc)
+            else:
+                su=Sudoku.NormalSudoku(r,c,sbr,sbc)
+            self.SetStatusText(_("Creating Sudoku, please wait...."))
+            self.app.Yield()
+            self._addSudoku(su)
+            self.SetStatusText("")
+        dlg.Destroy()
 
     def OnOpen(self,evt):
         print "open"
@@ -576,7 +533,7 @@ class SudokuMainFrame(wx.Frame):
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
             except Sudoku.Contradiction:
                 wx.MessageBox(_("Invalid sudoku file"),_("Invalid sudoku file"),
-                              style=wx.ICON_INFORMATION)
+                              style=wx.ICON_INFORMATION,parent=self)
         dlg.Destroy()
         self.SetStatusText("")
 
@@ -600,13 +557,13 @@ class SudokuMainFrame(wx.Frame):
             except Sudoku.Contradiction:
                 f.close()
                 wx.MessageBox(_("Invalid sudoku file"),_("Invalid sudoku file"),
-                              style=wx.ICON_INFORMATION)
+                              style=wx.ICON_INFORMATION,parent=self)
             except urllib.HTTPError,detail:
                 wx.MessageBox(_("The server said:\n%s\nRequesting the %s resource") %(detail,dlg.GetValue()),
                               _("Remote server error"),
-                              style=wx.ICON_INFORMATION)
+                              style=wx.ICON_INFORMATION,parent=self)
             except (urllib.URLError,ValueError),detail:
-                wx.MessageBox(_("Cannot open %s, reason %s") %(dlg.GetValue(),detail))
+                wx.MessageBox(_("Cannot open %s, reason %s") %(dlg.GetValue(),detail),parent=self)
         dlg.Destroy()
         self.SetStatusText("")
         
@@ -616,7 +573,7 @@ class SudokuMainFrame(wx.Frame):
         self.app.Yield()
         
         if not self.SudokuGrid.Solve():
-            wx.MessageBox(_("No solution has been found."),style=wx.ICON_INFORMATION)
+            wx.MessageBox(_("No solution has been found."),style=wx.ICON_INFORMATION,parent=self)
         self.SetStatusText("")
 
     def OnUndo(self,evt):
@@ -664,18 +621,18 @@ class SudokuMainFrame(wx.Frame):
                 self.shellframe.shell.interp.locals['app']=self.app
             except Exception, detail:
                 print _("Failed launching shell, reason %s") %(detail,)
-        
 
-class SudokuApp(wx.App,BaseApp.BaseApplication):
+
+class SudokuApp(wx.App,SudokuCommon.SudokuBaseApplication):
     """main wxApp"""
 
     def __init__(self,config="alsSudoku.cfg"):
-        BaseApp.BaseApplication.__init__(self,config)
+        SudokuCommon.SudokuBaseApplication.__init__(self,config)
         wx.App.__init__(self,redirect=False)
 
     def _setConfigDefaults(self):
         """Set App default configuration"""
-        BaseApp.BaseApplication._setConfigDefaults(self)
+        SudokuCommon.SudokuBaseApplication._setConfigDefaults(self)
         self.config.set("global","gui.icon","favicon.ico")
 
     def GetAppVersion(self):
@@ -716,7 +673,10 @@ if __name__ == "__main__":
         traceback.print_exc(file=trace)
         trace.close()
         traceback.print_exc(file=sys.stderr)
-        wx.MessageBox(traceback.format_exc(),"Traceback",wx.ICON_ERROR)
+        try:
+            wx.MessageBox(traceback.format_exc(),"Traceback",wx.ICON_ERROR)
+        except:
+            pass
     # close log
     if redirect:
         sys.stdout=old_stdout
