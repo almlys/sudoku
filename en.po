@@ -1,5 +1,5 @@
 #
-# $Id: ca.po 71 2007-01-09 03:23:58Z alberto $
+# $Id$
 #
 #    Copyright (C) 2007 Alberto Montañola Lacort
 #    See the file AUTHORS for more info
