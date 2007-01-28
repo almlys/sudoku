@@ -510,8 +510,8 @@ class SudokuMainFrame(wx.Frame):
     def OnNew(self,evt):
         print "new"
         #self.SudokuGrid.Reset()
-        import NewSudokuDialog
-        dlg=NewSudokuDialog.NewSudokuDialog(self)
+        import wxNewSudokuDialog
+        dlg=wxNewSudokuDialog.NewSudokuDialog(self)
         dlg.ShowModal()
         if dlg.OkStatus:
             type=dlg.type.GetValue()

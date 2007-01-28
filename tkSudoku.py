@@ -64,15 +64,15 @@ import observer
 
 # View classes
 
-class TCell(observer.Observer):
+class TCell(tki.Frame,observer.Observer):
     """A TCells is the view of a Sudoku's cell"""
     
     def __init__(self, row, col, focus, master, bg, hide_possib):
         observer.Observer.__init__(self)
-        self._widget = tki.Frame(master, bg=bg)
+        tki.Frame.__init__(self,master, bg=bg)
 
         self._possibls = tki.StringVar()
-        label=tki.Label(self._widget,
+        label=tki.Label(self,
                         textvariable=self._possibls,
                         width=9,
                         font="Arial 9",
@@ -80,7 +80,7 @@ class TCell(observer.Observer):
                         bg=bg)
         label.pack()
         self._value_var = tki.StringVar()
-        self._value_entry = tki.Entry(self._widget,
+        self._value_entry = tki.Entry(self,
                                       width=1,
                                       font="Arial 18 bold",
                                       textvariable=self._value_var,
@@ -144,10 +144,10 @@ class TCell(observer.Observer):
                 mcell._grid.unset(mcell._index)
                 new_value=0
 
-        #if new_value!=old_value:
+        if new_value!=old_value:
         #    EnableUndo(True)
         #    EnableReod(False)
-        #    History.Stack([mcell._index,old_value,new_value])
+            self.master.History.Stack([mcell._index,old_value,new_value])
 
     def on_move(self, event):
         key = event.keysym
@@ -159,18 +159,17 @@ class TCell(observer.Observer):
         self._focus.set(self.getSubject()._grid.rc2i(r, c))
 
 
-class TGrid(object):
+class TGrid(tki.Frame):
     """Represents the 9x9 grid formed by 3x3 Tboxes"""
     def __init__(self, master, hide_possib):
-        self._widget = tki.Frame(master,
-                                 borderwidth=2,
-                                 relief=tki.GROOVE)
+        tki.Frame.__init__(self,master,borderwidth=2,relief=tki.GROOVE)
         self._focus = tki.IntVar()
         self._focus.trace_variable("w", self.focus_set)
         self._tcells = [self._make_tcell(r, c, hide_possib)
                         for r in xrange(9)
                         for c in xrange(9)]
-        self._widget.pack()
+        self.pack()
+        self.History = SudokuCommon.History()
 
     def _make_tcell(self, row, col, hide_possib):
         #background = ("#cb83ac","#cb9eac")[Sudoku.rc2b(row, col) % 2],
@@ -178,10 +177,10 @@ class TGrid(object):
         tcell = TCell(row,
                       col,
                       self._focus,
-                      self._widget,
+                      self,
                       background,
                       hide_possib)
-        tcell._widget.grid(row=row, column=col)
+        tcell.grid(row=row, column=col)
         return tcell
     
     def update(self):
