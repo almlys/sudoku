@@ -65,7 +65,7 @@ class MyCell(Sudoku.Cell, observer.Subject):
 class History(object):
     """Handles the application History"""
 
-    def __init__(self,maxSize=10):
+    def __init__(self,maxSize=0):
         self.maxSize=maxSize
         self.undo=[]
         self.redo=[]

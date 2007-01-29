@@ -101,12 +101,17 @@ class TCell(tki.Frame,observer.Observer):
             self._hide_possib.trace_variable("w", self.update)
         except AttributeError:
             # Parent app does not have a hide_possib variable implemented
-            pass
+            self._hide_possib = tki.IntVar()
 
         try:
             self._focus = self.master._focus
         except AttributeError:
-            pass
+            self._focus = tki.IntVar()
+
+        try:
+            self._history_hook = self.master.parent._history_callback
+        except AttributeError:
+            self._history_hook = None
 
         self._row = row
         self._col = col
@@ -153,10 +158,8 @@ class TCell(tki.Frame,observer.Observer):
                 mcell._grid.unset(mcell._index)
                 new_value=0
 
-        #if new_value!=old_value:
-        #    EnableUndo(True)
-        #    EnableReod(False)
-            #self.master.History.Stack([mcell._index,old_value,new_value])
+        if new_value!=old_value and self._history_hook != None:
+            self._history_hook("s",mcell._index,old_value,new_value)
 
     def on_move(self, event):
         key = event.keysym
@@ -227,6 +230,7 @@ class SudokuFrame(tki.Frame):
         self.app=app
         self._bind_callbacks()
         self._create_tki_vars()
+        self._create_history()
         self._create_view()
         self._create_model()
         self._connect()
@@ -240,6 +244,9 @@ class SudokuFrame(tki.Frame):
         self.app_language = tki.StringVar()
         self.app_language.set(self.app.GetLanguage())
         self.app_language.trace_variable("w",self._do_changeLanguage)
+
+    def _create_history(self):
+        self.History=SudokuCommon.History()
 
     def _create_view(self):
         self.pack()
@@ -272,6 +279,7 @@ class SudokuFrame(tki.Frame):
         sudomenu.add_separator()
         sudomenu.add_command(label=_("Undo"), command=self._do_undo, state=tki.DISABLED)
         sudomenu.add_command(label=_("Redo"), command=self._do_redo, state=tki.DISABLED)
+        self._sudomenu=sudomenu
 
         optsmenu=tki.Menu(self.menu)
         self.menu.add_cascade(label=_("Options"), menu=optsmenu)
@@ -320,9 +328,21 @@ class SudokuFrame(tki.Frame):
                    text=_("Solve"),
                    command=self._do_solve).pack(side=tki.LEFT)
 
+        self._undobtn=tki.Button(self.ToolBar,
+                                 text=_("Undo"),
+                                 command=self._do_undo,
+                                 state=tki.DISABLED)
+        self._undobtn.pack(side=tki.LEFT)
+        self._redobtn=tki.Button(self.ToolBar,
+                                 text=_("Redo"),
+                                 command=self._do_redo,
+                                 state=tki.DISABLED)
+        self._redobtn.pack(side=tki.LEFT)
+        
         tki.Checkbutton(self.ToolBar,
                         text=_("Show Hints"),
                         variable=self.hide_possib).pack(side=tki.LEFT)
+
 
     def _create_sudoku(self):
         self._tgrid = TGrid(self,self.lSudokuGrid)
@@ -342,6 +362,30 @@ class SudokuFrame(tki.Frame):
             mcell.attach(tcell)
             mcell.notify()
 
+    # History
+
+    def EnableUndo(self,enabled=True):
+        if enabled:
+            self._undobtn.config(state=tki.NORMAL)
+            self._sudomenu.entryconfigure(3,state=tki.NORMAL)
+        else:
+            self._undobtn.config(state=tki.DISABLED)
+            self._sudomenu.entryconfigure(3,state=tki.DISABLED)
+
+    def EnableRedo(self,enabled=True):
+        if enabled:
+            self._redobtn.config(state=tki.NORMAL)
+            self._sudomenu.entryconfig(4,state=tki.NORMAL)
+        else:
+            self._redobtn.config(state=tki.DISABLED)
+            self._sudomenu.entryconfig(4,state=tki.DISABLED)
+    
+    def _history_callback(self,*args):
+        self.EnableUndo(True)
+        self.EnableRedo(False)
+        self.History.Stack(args)
+        print args
+
     # Actions
 
     def _do_exit(self):
@@ -352,6 +396,7 @@ class SudokuFrame(tki.Frame):
 
     def _do_new(self):
         print "New"
+        self._grid.reset()
     
     def _do_loadFromFile(self):
         # TODO: Check errors !!!
@@ -420,16 +465,42 @@ class SudokuFrame(tki.Frame):
             from tkMessageBox import showinfo
             showinfo(message=_("No solution has been found."))
         else:
+            bkgrid = Sudoku.Grid()
+            bkgrid.copy_values_from(self._grid)
             self._grid.copy_values_from(solution)
         self.StatusBar.set("")
 
     def _do_undo(self):
         print "undo"
-        self._grid.undo()
+        self.EnableRedo(True)
+        hist = self.History.Undo()
+        if self.History.isEmpty():
+            self.EnableUndo(False)
+        cmd = hist[0]
+        if cmd=="s":
+            # Single value was stacked
+            idx, old, new = hist[1:]
+            self._grid.unset(idx)
+            if old!=0:
+                self._grid.set(idx,old)
+        elif cmd=="t":
+            # An entire Sudoku was stacked
+            pass
+        else:
+            raise NotImplemented
 
     def _do_redo(self):
         print "redo"
-        self._grid.redo()
+        self.EnableUndo(True)
+        hist = self.History.Redo()
+        if self.History.isRedoEmpty():
+            self.EnableRedo(False)
+        cmd = hist[0]
+        if cmd=="s":
+            idx, old, new = hist[1:]
+            self._grid.unset(idx)
+            if new!=0:
+                self._grid.set(idx,new)
 
     def _do_changeLanguage(self, *args):
         print "change language %s" %(self.app_language.get())
@@ -466,8 +537,9 @@ class SudokuApp(SudokuCommon.SudokuBaseApplication):
 
 
 if __name__ == "__main__":
+
     # open log
-    redirect = True
+    redirect = False
     import sys,sdlogger
     if redirect:
         log = sdlogger.mlog(sys.stdout,"stdout.log","w")
@@ -477,9 +549,9 @@ if __name__ == "__main__":
         sys.stdout=log
         sys.stderr=logerr
     try:
-        root = SudokuApp()
-        root.MainLoop()
-        del root
+        app = SudokuApp()
+        app.MainLoop()
+        del app
     except:
         import traceback
         trace=file("traceback.log","w")

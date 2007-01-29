@@ -322,8 +322,8 @@ class Cell(object):
         
     def set(self, value):
         if value not in self._possibls:
-            print value,self._possibls
-            raise Contradiction()
+            #print value,self._possibls
+            raise Contradiction
         self._value = value
         self._possibls = set((value,))
 

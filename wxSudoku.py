@@ -50,7 +50,6 @@ but if you don't have root access you will need to manually install wxPython in 
     import sys
     sys.exit(-1)
 
-
 # View classes
 
 class CellPanel(wx.Panel,observer.Observer):
@@ -65,20 +64,15 @@ class CellPanel(wx.Panel,observer.Observer):
         self._initLayout()
 
     def _initLayout(self):
-        #szb=wx.GridSizer(0,1)
         self._sizer=wx.BoxSizer(wx.VERTICAL)
-        #self._sizer.SetFlexibleDirection(wx.VERTICAL)
-        #szb.Add(self._sizer,flag=wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL | wx.EXPAND)
-        #self.SetSizer(szb)
         self.SetSizer(self._sizer)
         self.HintsLabel=wx.StaticText(self,style=wx.ALIGN_CENTER)
-        #self.HintsLabel.SetLabel("123456789")
+        self.HintsLabel.SetLabel("123456789")
         self.HintsLabel.SetFont(wx.FFont(8,wx.FONTFAMILY_DEFAULT,face="Arial"))
         self._sizer.Add(self.HintsLabel,0,flag=wx.ALIGN_CENTER)
-        self.TextBox=wx.TextCtrl(self,value="%i,%i" %(self.row,self.col),size=(-1,-1),style=wx.TE_PROCESS_ENTER | wx.NO_BORDER | wx.TE_CENTRE)
+        self.TextBox=wx.TextCtrl(self,style=wx.TE_PROCESS_ENTER | wx.NO_BORDER | wx.TE_CENTRE)
         self.TextBox.SetFont(wx.FFont(16,wx.FONTFAMILY_DEFAULT,face="Arial",flags=wx.FONTFLAG_BOLD))
         self.TextBox.SetBackgroundColour(self.GetBackgroundColour())
-        #self.TextBox.SetSize((30,5))
         self.TextBox.Bind(wx.EVT_KEY_DOWN,self.OnKey)
         self.TextBox.Bind(wx.EVT_TEXT_ENTER,self.OnChange)
         self.TextBox.Bind(wx.EVT_KILL_FOCUS,self.OnChange)
@@ -187,8 +181,6 @@ class SudokuGridPanel(wx.Panel):
         if samurai:
             vhole=(self.c - 1) / 2
             hhole=(self.r - 1) / 2
-            print vhole
-            print hhole
         for r in xrange(self.r):
             for c in xrange(self.c):
                 flag=wx.ALL | wx.EXPAND
@@ -203,10 +195,8 @@ class SudokuGridPanel(wx.Panel):
                     self._GridSizer.Add(cgrid,1,border=1,flag=flag)
                     for br in xrange(self.sbr):
                         for bc in xrange(self.sbc):
-                            #itm=wx.TextCtrl(self,value="%i,%i" %(c*self.sbc + bc,r*self.sbr + br))s
                             itm=CellPanel(self,(r*self.sbr + br,c*self.sbc + bc),bgcolor)
                             cgrid.Add(itm,1,border=1,flag=wx.ALL | wx.EXPAND)
-                            #itm.Bind(wx.EVT_KEY_DOWN, self.OnKey)
                             self._ViewCells[(r*self.sbr + br) * self.sbc * self.c + c*self.sbc + bc]=itm
 
     def _addHistory(self):
@@ -488,6 +478,7 @@ class SudokuMainFrame(wx.Frame):
         self.Sizer.Insert(0,self.ToolBar,flag=wx.EXPAND)
 
     def _addSudoku(self,type=None):
+        self.Freeze()
         try:
             self.SudokuGrid.Destroy()
             self._scrollpanel.Destroy()
@@ -509,6 +500,7 @@ class SudokuMainFrame(wx.Frame):
             self.SudokuGrid=SudokuGridPanel(self,self._scrollpanel,type)
             sizer.Add(self.SudokuGrid,0,wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL)
         self.SudokuGrid.ShowHints(self.ShowHints)
+        self.Thaw()
 
     def EnableUndo(self,enabled=True):
         self.__undo.Enable(enabled)
@@ -696,8 +688,9 @@ class SudokuApp(wx.App,SudokuCommon.SudokuBaseApplication):
 
 
 if __name__ == "__main__":
+
     # open log
-    redirect = True
+    redirect = False
     import sys,sdlogger
     if redirect:
         log = sdlogger.mlog(sys.stdout,"stdout.log","w")
