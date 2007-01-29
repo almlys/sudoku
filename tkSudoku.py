@@ -67,7 +67,7 @@ import observer
 class TCell(tki.Frame,observer.Observer):
     """A TCells is the view of a Sudoku's cell"""
     
-    def __init__(self, row, col, focus, master, bg, hide_possib):
+    def __init__(self, master, row, col, bg):
         observer.Observer.__init__(self)
         tki.Frame.__init__(self,master, bg=bg)
 
@@ -96,12 +96,21 @@ class TCell(tki.Frame,observer.Observer):
         self._value_entry.bind('<Right>', self.on_move)
         self._value_entry.pack()
 
-        hide_possib.trace_variable("w", self.update)
-        self._hide_possib = hide_possib
+        try:
+            self._hide_possib = self.master.parent.hide_possib
+            self._hide_possib.trace_variable("w", self.update)
+        except AttributeError:
+            # Parent app does not have a hide_possib variable implemented
+            pass
+
+        try:
+            self._focus = self.master._focus
+        except AttributeError:
+            pass
 
         self._row = row
         self._col = col
-        self._focus = focus
+
         
     def update(self, *args):
         """The model cell has changed so we must update the view"""
@@ -144,10 +153,10 @@ class TCell(tki.Frame,observer.Observer):
                 mcell._grid.unset(mcell._index)
                 new_value=0
 
-        if new_value!=old_value:
+        #if new_value!=old_value:
         #    EnableUndo(True)
         #    EnableReod(False)
-            self.master.History.Stack([mcell._index,old_value,new_value])
+            #self.master.History.Stack([mcell._index,old_value,new_value])
 
     def on_move(self, event):
         key = event.keysym
@@ -161,25 +170,25 @@ class TCell(tki.Frame,observer.Observer):
 
 class TGrid(tki.Frame):
     """Represents the 9x9 grid formed by 3x3 Tboxes"""
-    def __init__(self, master, hide_possib):
-        tki.Frame.__init__(self,master,borderwidth=2,relief=tki.GROOVE)
+    def __init__(self, master, master_panel=None):
+        if master_panel==None:
+            master_panel=master
+        self.parent=master
+        tki.Frame.__init__(self,master_panel,borderwidth=2,relief=tki.GROOVE)
         self._focus = tki.IntVar()
         self._focus.trace_variable("w", self.focus_set)
-        self._tcells = [self._make_tcell(r, c, hide_possib)
+        self._tcells = [self._make_tcell(r, c)
                         for r in xrange(9)
                         for c in xrange(9)]
         self.pack()
-        self.History = SudokuCommon.History()
 
-    def _make_tcell(self, row, col, hide_possib):
+    def _make_tcell(self, row, col):
         #background = ("#cb83ac","#cb9eac")[Sudoku.rc2b(row, col) % 2],
         background = ("#cb83ac","#cb9eac")[((row/3)*3 + (col/3)) % 2],
-        tcell = TCell(row,
+        tcell = TCell(self,
+                      row,
                       col,
-                      self._focus,
-                      self,
-                      background,
-                      hide_possib)
+                      background)
         tcell.grid(row=row, column=col)
         return tcell
     
@@ -316,7 +325,7 @@ class SudokuFrame(tki.Frame):
                         variable=self.hide_possib).pack(side=tki.LEFT)
 
     def _create_sudoku(self):
-        self._tgrid = TGrid(self.lSudokuGrid,hide_possib=self.hide_possib)
+        self._tgrid = TGrid(self,self.lSudokuGrid)
 
     def _create_statusBar(self):
         self.StatusBar = StatusBar(self.lStatusBar)
@@ -359,6 +368,10 @@ class SudokuFrame(tki.Frame):
         except Sudoku.Contradiction: # Dialog guarantees filename exists
             from tkMessageBox import showinfo
             showinfo(message=_("Invalid sudoku file"))
+        except Exception, detail:
+            # Any other issue, is a filesystem, parse, etc, etc, etc... error
+            from tkMessageBox import showerror
+            showerror(message=(_("Malformed, unconsistent, or unexistent file.\n%s") %(detail,)))
         self.StatusBar.set("")
 
     def _do_loadFromURL(self):
@@ -387,7 +400,11 @@ class SudokuFrame(tki.Frame):
             showinfo(message=_("The server said:\n%s\nRequesting the %s resource") %(detail,filename),
                           title=_("Remote server error"))
         except (urllib.URLError,ValueError),detail:
-            showinfo(_("Cannot open %s, reason %s") %(filename,detail))
+            showinfo(message=_("Cannot open %s, reason %s") %(filename,detail))
+        except Exception, detail:
+            # Any other issue, is a filesystem, parse, etc, etc, etc... error
+            from tkMessageBox import showerror
+            showerror(message=(_("Malformed, unconsistent, or unexistent file.\n%s") %(detail,)))
         self.StatusBar.set("")
 
 

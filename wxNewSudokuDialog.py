@@ -37,15 +37,16 @@ class NewSudokuDialog(wx.Dialog):
         self.label_1 = wx.StaticText(self, -1, _("Type"))
         self.type = wx.ComboBox(self, -1, choices=[_("Normal"), _("Samurai")], style=wx.CB_DROPDOWN|wx.CB_SIMPLE|wx.CB_READONLY)
         self.label_2 = wx.StaticText(self, -1, _("Block Size"))
-        self.brows = wx.ComboBox(self, -1, choices=[_("2"), _("3"), _("4"), _("5")], style=wx.CB_DROPDOWN|wx.CB_SIMPLE|wx.CB_READONLY)
+        self.brows = wx.ComboBox(self, -1, choices=[_("2"), _("3"), _("4")], style=wx.CB_DROPDOWN|wx.CB_SIMPLE|wx.CB_READONLY)
         self.label_3 = wx.StaticText(self, -1, _("X"))
-        self.bcols = wx.ComboBox(self, -1, choices=[_("2"), _("3"), _("4"), _("5")], style=wx.CB_DROPDOWN|wx.CB_SIMPLE|wx.CB_READONLY)
+        self.bcols = wx.ComboBox(self, -1, choices=[_("2"), _("3"), _("4")], style=wx.CB_DROPDOWN|wx.CB_SIMPLE|wx.CB_READONLY)
         self.button_1 = wx.Button(self, -1, _("&Ok"))
         self.button_2 = wx.Button(self, -1, _("&Cancel"))
 
         self.__set_properties()
         self.__do_layout()
 
+        self.Bind(wx.EVT_COMBOBOX, self.OnCombo, self.type)
         self.Bind(wx.EVT_BUTTON, self.OnOk, self.button_1)
         self.Bind(wx.EVT_BUTTON, self.OnCancel, self.button_2)
         # end wxGlade
@@ -56,7 +57,9 @@ class NewSudokuDialog(wx.Dialog):
         self.SetTitle(_("Create New Sudoku"))
         self.SetFocus()
         self.type.SetSelection(1)
+        self.brows.Enable(False)
         self.brows.SetSelection(1)
+        self.bcols.Enable(False)
         self.bcols.SetSelection(1)
         self.button_1.SetDefault()
         # end wxGlade
@@ -92,6 +95,17 @@ class NewSudokuDialog(wx.Dialog):
 
     def OnCancel(self, event): # wxGlade: NewSudokuDialog.<event_handler>
         self.Hide()
+
+    def OnCombo(self, event): # wxGlade: NewSudokuDialog.<event_handler>
+        if self.type.GetValue()==_("Samurai"):
+            self.brows.SetSelection(1)
+            self.bcols.SetSelection(1)
+            self.brows.Disable()
+            self.bcols.Disable()
+        else:
+            self.brows.Enable()
+            self.bcols.Enable()
+            
 
 # end of class NewSudokuDialog
 

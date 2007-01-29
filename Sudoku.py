@@ -275,6 +275,7 @@ class Grid(CoordinateInterface):
 
     def load_from_stream(self, data, ftype):
         # Does NOT control any error !!!!
+        # Error control is performed in the calling code
         self.reset()
         if ftype=="gpe":
             import xmlparser

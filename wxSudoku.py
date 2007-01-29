@@ -73,10 +73,10 @@ class CellPanel(wx.Panel,observer.Observer):
         self.SetSizer(self._sizer)
         self.HintsLabel=wx.StaticText(self,style=wx.ALIGN_CENTER)
         #self.HintsLabel.SetLabel("123456789")
-        self.HintsLabel.SetFont(wx.FFont(9,wx.FONTFAMILY_DEFAULT,face="Arial"))
+        self.HintsLabel.SetFont(wx.FFont(8,wx.FONTFAMILY_DEFAULT,face="Arial"))
         self._sizer.Add(self.HintsLabel,0,flag=wx.ALIGN_CENTER)
         self.TextBox=wx.TextCtrl(self,value="%i,%i" %(self.row,self.col),size=(-1,-1),style=wx.TE_PROCESS_ENTER | wx.NO_BORDER | wx.TE_CENTRE)
-        self.TextBox.SetFont(wx.FFont(18,wx.FONTFAMILY_DEFAULT,face="Arial",flags=wx.FONTFLAG_BOLD))
+        self.TextBox.SetFont(wx.FFont(16,wx.FONTFAMILY_DEFAULT,face="Arial",flags=wx.FONTFLAG_BOLD))
         self.TextBox.SetBackgroundColour(self.GetBackgroundColour())
         #self.TextBox.SetSize((30,5))
         self.TextBox.Bind(wx.EVT_KEY_DOWN,self.OnKey)
@@ -163,7 +163,7 @@ class SudokuGridPanel(wx.Panel):
         wx.Panel.__init__(self,parentpanel,*args,**kwargs)
         self.parent=appparent
         self.SetBackgroundColour((48,7,11))
-        self._ShowHints=self.parent.ShowHints
+        self._ShowHints=False
         if type==None:
             type=Sudoku.NormalSudoku(3,3,3,3)
         self._type=type
@@ -183,6 +183,12 @@ class SudokuGridPanel(wx.Panel):
         self._ViewCells=[None for a in xrange(self.r*self.c*self.sbc*self.sbr)]
         self._GridSizer=wx.GridSizer(self.r,self.c)
         self.SetSizer(self._GridSizer)
+        samurai = isinstance(self._type,Sudoku.SamuraiSudoku)
+        if samurai:
+            vhole=(self.c - 1) / 2
+            hhole=(self.r - 1) / 2
+            print vhole
+            print hhole
         for r in xrange(self.r):
             for c in xrange(self.c):
                 flag=wx.ALL | wx.EXPAND
@@ -190,15 +196,18 @@ class SudokuGridPanel(wx.Panel):
                 if self.c % 2 == 0 and r % 2:
                     ci+=1
                 bgcolor = ((0xCB,0x83,0xAC),(0xCB,0x9E,0xAC))[ci % 2]
-                cgrid=wx.GridSizer(self.sbr,self.sbc)
-                self._GridSizer.Add(cgrid,1,border=1,flag=flag)
-                for br in xrange(self.sbr):
-                    for bc in xrange(self.sbc):
-                        #itm=wx.TextCtrl(self,value="%i,%i" %(c*self.sbc + bc,r*self.sbr + br))s
-                        itm=CellPanel(self,(r*self.sbr + br,c*self.sbc + bc),bgcolor)
-                        cgrid.Add(itm,1,border=1,flag=wx.ALL | wx.EXPAND)
-                        #itm.Bind(wx.EVT_KEY_DOWN, self.OnKey)
-                        self._ViewCells[(r*self.sbr + br) * self.sbc * self.c + c*self.sbc + bc]=itm
+                if samurai and ((c==vhole and (r<hhole-1 or r>hhole+1)) or (r==hhole and (c<vhole-1 or c>vhole+1))):
+                    self._GridSizer.AddSpacer((0,0))
+                else:
+                    cgrid=wx.GridSizer(self.sbr,self.sbc)
+                    self._GridSizer.Add(cgrid,1,border=1,flag=flag)
+                    for br in xrange(self.sbr):
+                        for bc in xrange(self.sbc):
+                            #itm=wx.TextCtrl(self,value="%i,%i" %(c*self.sbc + bc,r*self.sbr + br))s
+                            itm=CellPanel(self,(r*self.sbr + br,c*self.sbc + bc),bgcolor)
+                            cgrid.Add(itm,1,border=1,flag=wx.ALL | wx.EXPAND)
+                            #itm.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+                            self._ViewCells[(r*self.sbr + br) * self.sbc * self.c + c*self.sbc + bc]=itm
 
     def _addHistory(self):
         self.History=SudokuCommon.History()
@@ -208,15 +217,20 @@ class SudokuGridPanel(wx.Panel):
 
     def _connect(self):
         for idx in xrange(len(self._ModelGrid)):
-            mcell = self._ModelGrid._cells[idx]
             wcell = self._ViewCells[idx]
+            if wcell==None: continue
+            mcell = self._ModelGrid._cells[idx]
             mcell.attach(wcell)
             mcell.notify()
 
     def ShowHints(self,show):
         self._ShowHints=show
+        self.Update()
+
+    def Update(self):
         for lala in self._ViewCells:
-            lala.update()
+            if lala!=None:
+                lala.update()
 
     def Solve(self):
         try:
@@ -474,20 +488,27 @@ class SudokuMainFrame(wx.Frame):
         self.Sizer.Insert(0,self.ToolBar,flag=wx.EXPAND)
 
     def _addSudoku(self,type=None):
+        try:
+            self.SudokuGrid.Destroy()
+            self._scrollpanel.Destroy()
+        except AttributeError:
+            pass
         self.Sizer.Remove(1)
+        # Documentation says that Remove destroys the item, BUT it is not DESTROYED!!!!!!!, it is only detached!!
         if 1:
             self.SudokuGrid=SudokuGridPanel(self,type=type)
             self.Sizer.Insert(1,self.SudokuGrid,1,wx.EXPAND)
         else:
-            panel=wx.ScrolledWindow(self)
+            self._scrollpanel=wx.ScrolledWindow(self)
             #panel.AdjustScrollbars()
-            panel.SetScrollbars(10,10,10,10)
-            panel.SetBackgroundColour((0,100,0))
-            self.Sizer.Insert(1,panel,1,wx.EXPAND)
+            self._scrollpanel.SetScrollbars(10,10,10,10)
+            self._scrollpanel.SetBackgroundColour((0,100,0))
+            self.Sizer.Insert(1,self._scrollpanel,1,wx.EXPAND)
             sizer=wx.GridSizer()
-            panel.SetSizer(sizer)
-            self.SudokuGrid=SudokuGridPanel(self,panel,type)
+            self._scrollpanel.SetSizer(sizer)
+            self.SudokuGrid=SudokuGridPanel(self,self._scrollpanel,type)
             sizer.Add(self.SudokuGrid,0,wx.ALIGN_CENTER | wx.ALIGN_CENTER_VERTICAL)
+        self.SudokuGrid.ShowHints(self.ShowHints)
 
     def EnableUndo(self,enabled=True):
         self.__undo.Enable(enabled)
@@ -547,6 +568,10 @@ class SudokuMainFrame(wx.Frame):
             except Sudoku.Contradiction:
                 wx.MessageBox(_("Invalid sudoku file"),_("Invalid sudoku file"),
                               style=wx.ICON_INFORMATION,parent=self)
+            except Exception,detail:
+                wx.MessageBox(_("Malformed, unconsistent, or unexistent file.\n%s") %(detail,),
+                              _("Invalid sudoku file"),
+                              style=wx.ICON_ERROR,parent=self)
         dlg.Destroy()
         self.SetStatusText("")
 
@@ -577,6 +602,10 @@ class SudokuMainFrame(wx.Frame):
                               style=wx.ICON_INFORMATION,parent=self)
             except (urllib.URLError,ValueError),detail:
                 wx.MessageBox(_("Cannot open %s, reason %s") %(dlg.GetValue(),detail),parent=self)
+            except Exception,detail:
+                wx.MessageBox(_("Malformed, unconsistent, or unexistent file.\n%s") %(detail,),
+                              _("Invalid sudoku file"),
+                              style=wx.ICON_ERROR,parent=self)
         dlg.Destroy()
         self.SetStatusText("")
         
