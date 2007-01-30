@@ -101,16 +101,12 @@ class CellPanel(wx.Panel,observer.Observer):
         r,c = self.row, self.col
         grid = self.getSubject()._grid
         if code==wx.WXK_UP:
-            print "UP"
             r = (r-1) % grid.getTotalNumRows()
         elif code==wx.WXK_DOWN:
-            print "DOWN"
             r = (r+1) % grid.getTotalNumRows()
         elif code==wx.WXK_RIGHT:
-            print "RIGHT"
             c = (c+1) % grid.getTotalNumCols()
         elif code==wx.WXK_LEFT:
-            print "LEFT"
             c = (c-1) % grid.getTotalNumCols()
         else:
             evt.Skip()
@@ -140,9 +136,7 @@ class CellPanel(wx.Panel,observer.Observer):
                 new_value=0
 
         if new_value!=old_value:
-            self.parent.parent.EnableUndo(True)
-            self.parent.parent.EnableRedo(False)
-            self.parent.History.Stack([mcell._index,old_value,new_value])
+            self.parent.parent._history_callback("s",mcell._index,old_value,new_value)
 
     def SetFocus(self):
         self.TextBox.SetFocus()
@@ -166,7 +160,6 @@ class SudokuGridPanel(wx.Panel):
         self.r=type.r
         self.c=type.c
         self._initLayout()
-        self._addHistory()
         self._create_model()
         self._connect()
 
@@ -199,9 +192,6 @@ class SudokuGridPanel(wx.Panel):
                             cgrid.Add(itm,1,border=1,flag=wx.ALL | wx.EXPAND)
                             self._ViewCells[(r*self.sbr + br) * self.sbc * self.c + c*self.sbc + bc]=itm
 
-    def _addHistory(self):
-        self.History=SudokuCommon.History()
-
     def _create_model(self):
         self._ModelGrid=SudokuCommon.MyGrid(self._type)
 
@@ -222,47 +212,12 @@ class SudokuGridPanel(wx.Panel):
             if lala!=None:
                 lala.update()
 
-    def Solve(self):
-        try:
-            grid = Sudoku.Grid(self._ModelGrid)
-            grid.copy_values_from(self._ModelGrid)
-            solution = Sudoku.solve(grid)
-        except Sudoku.Contradiction:
-            solution = None
-        if solution is None:
-            return False
-        else:
-            self._ModelGrid.copy_values_from(solution)
-            return True
-
     def Reset(self):
-        self.History.Clear()
-        self.parent.EnableRedo(False)
-        self.parent.EnableUndo(False)
         self._ModelGrid.reset()
 
-    def Undo(self):
-        self.parent.EnableRedo(True)
-        idx, old, new=self.History.Undo()
-        if self.History.isEmpty():
-            self.parent.EnableUndo(False)
-        print idx,old
-        self._ModelGrid.unset(idx)
-        if old!=0:
-            self._ModelGrid.set(idx,old)
-
-    def Redo(self):
-        self.parent.EnableUndo(True)
-        idx, old, new=self.History.Redo()
-        if self.History.isRedoEmpty():
-            self.parent.EnableRedo(False)
-        print idx,new
-        self._ModelGrid.unset(idx)
-        if new!=0:
-            self._ModelGrid.set(idx,new)
-
     def SetFocus(self,idx):
-        self._ViewCells[idx].SetFocus()
+        if self._ViewCells[idx]!=None:
+            self._ViewCells[idx].SetFocus()
 
 
 class SudokuMainFrame(wx.Frame):
@@ -280,6 +235,7 @@ class SudokuMainFrame(wx.Frame):
         self._loadAccessKeys()
         self._loadHelpTips()
         self._bindEvents()
+        self._addHistory()
         self._addStatusBar()
         self._addMenus()
         self._addSizer()
@@ -323,6 +279,9 @@ class SudokuMainFrame(wx.Frame):
 
     def _bindEvents(self):
         self.Bind(wx.EVT_CLOSE, self.OnExit)
+
+    def _addHistory(self):
+        self.History=SudokuCommon.History()
 
     def _addStatusBar(self):
         self.StatusBar = wx.StatusBar(self)
@@ -502,6 +461,8 @@ class SudokuMainFrame(wx.Frame):
         self.SudokuGrid.ShowHints(self.ShowHints)
         self.Thaw()
 
+    # History
+
     def EnableUndo(self,enabled=True):
         self.__undo.Enable(enabled)
         self.ToolBar.EnableTool(self.__undobtid,enabled)
@@ -509,6 +470,13 @@ class SudokuMainFrame(wx.Frame):
     def EnableRedo(self,enabled=True):
         self.__redo.Enable(enabled)
         self.ToolBar.EnableTool(self.__redobtid,enabled)
+
+    def _history_callback(self,*args):
+        self.EnableUndo(True)
+        self.EnableRedo(False)
+        self.History.Stack(args)
+
+    # Actions
 
     def OnExit(self,evt):
         if type(evt)!=wx.CloseEvent or evt.CanVeto():
@@ -521,12 +489,13 @@ class SudokuMainFrame(wx.Frame):
         self.Destroy()
 
     def OnNew(self,evt):
-        print "new"
         #self.SudokuGrid.Reset()
         import wxNewSudokuDialog
         dlg=wxNewSudokuDialog.NewSudokuDialog(self)
         dlg.ShowModal()
         if dlg.OkStatus:
+            bkgrid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
+            bkgrid.copy_values_from(self.SudokuGrid._ModelGrid)
             type=dlg.type.GetValue()
             sbr=int(dlg.brows.GetValue())
             sbc=int(dlg.bcols.GetValue())
@@ -539,11 +508,14 @@ class SudokuMainFrame(wx.Frame):
             self.SetStatusText(_("Creating Sudoku, please wait...."))
             self.app.Yield()
             self._addSudoku(su)
+            emptygrid = Sudoku.Grid(su)
+            if bkgrid!=emptygrid:
+                self._history_callback("t",bkgrid,emptygrid)
+
             self.SetStatusText("")
         dlg.Destroy()
 
     def OnOpen(self,evt):
-        print "open"
         dlg=wx.FileDialog(self,wildcard="".join((
             _("GPE files")," (*.gpe)|*.gpe|",
             _("TSudoku files")," (*.tsdk)|*.tsdk|",
@@ -554,9 +526,13 @@ class SudokuMainFrame(wx.Frame):
             self.SetStatusText(_("Opening %s, please wait...") % (filep,))
             self.app.Yield()
             try:
+                bkgrid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
+                bkgrid.copy_values_from(self.SudokuGrid._ModelGrid)
                 grid=Sudoku.Grid()
                 grid.load_from_file(filep)
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
+                if bkgrid!=grid:
+                    self._history_callback("t",bkgrid,grid)
             except Sudoku.Contradiction:
                 wx.MessageBox(_("Invalid sudoku file"),_("Invalid sudoku file"),
                               style=wx.ICON_INFORMATION,parent=self)
@@ -576,6 +552,8 @@ class SudokuMainFrame(wx.Frame):
             import urllib2 as urllib
             try:
                 f=urllib.urlopen(dlg.GetValue())
+                bkgrid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
+                bkgrid.copy_values_from(self.SudokuGrid._ModelGrid)
                 grid=Sudoku.Grid()
                 if dlg.GetValue().lower().endswith(".gpe"):
                     ftype="gpe"
@@ -583,6 +561,8 @@ class SudokuMainFrame(wx.Frame):
                     ftype="tsdk"
                 grid.load_from_stream(f,ftype)
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
+                if bkgrid!=grid:
+                    self._history_callback("t",bkgrid,grid)
                 f.close()
             except Sudoku.Contradiction:
                 f.close()
@@ -605,18 +585,76 @@ class SudokuMainFrame(wx.Frame):
     def OnSolve(self,evt):
         self.SetStatusText(_("Solving Sudoku, please wait...."))
         self.app.Yield()
-        
-        if not self.SudokuGrid.Solve():
+
+        try:
+            grid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
+            grid.copy_values_from(self.SudokuGrid._ModelGrid)
+            solution = Sudoku.solve(grid)
+        except Sudoku.Contradiction:
+            solution = None
+        if solution is None:
             wx.MessageBox(_("No solution has been found."),style=wx.ICON_INFORMATION,parent=self)
+        else:
+            bkgrid = Sudoku.Grid()
+            bkgrid.copy_values_from(self.SudokuGrid._ModelGrid)
+            self.SudokuGrid._ModelGrid.copy_values_from(solution)
+            if bkgrid!=solution:
+                self._history_callback("t",bkgrid,solution)
+
         self.SetStatusText("")
 
+    def Reset(self):
+        self.History.Clear()
+        self.parent.EnableRedo(False)
+        self.parent.EnableUndo(False)
+        self.SudokuGrid._ModelGrid.reset()
+
     def OnUndo(self,evt):
-        print "undo"
-        self.SudokuGrid.Undo()
+        self.EnableRedo(True)
+        hist = self.History.Undo()
+        if self.History.isEmpty():
+            self.EnableUndo(False)
+        cmd = hist[0]
+        if cmd=="s":
+            # Single value was stacked
+            idx, old, new = hist[1:]
+            self.SudokuGrid._ModelGrid.unset(idx)
+            if old!=0:
+                self.SudokuGrid._ModelGrid.set(idx,old)
+        elif cmd=="t":
+            # An entire Sudoku was stacked
+            old, new = hist[1:]
+            if old._type!=new._type:
+                self.SetStatusText(_("Creating Sudoku, please wait...."))
+                self.app.Yield()
+                self._addSudoku(old._type)
+                self.SetStatusText("")
+            self.SudokuGrid._ModelGrid.copy_values_from(old)
+        else:
+            raise NotImplemented
+
 
     def OnRedo(self,evt):
-        print "redo"
-        self.SudokuGrid.Redo()
+        self.EnableUndo(True)
+        hist = self.History.Redo()
+        if self.History.isRedoEmpty():
+            self.EnableRedo(False)
+        cmd = hist[0]
+        if cmd=="s":
+            idx, old, new = hist[1:]
+            self.SudokuGrid._ModelGrid.unset(idx)
+            if new!=0:
+                self.SudokuGrid._ModelGrid.set(idx,new)
+        elif cmd=="t":
+            old, new = hist[1:]
+            if old._type!=new._type:
+                self.SetStatusText(_("Creating Sudoku, please wait...."))
+                self.app.Yield()
+                self._addSudoku(new._type)
+                self.SetStatusText("")
+            self.SudokuGrid._ModelGrid.copy_values_from(new)
+        else:
+            raise NotImplemented
 
     def OnShowHints(self,evt):
         self.ShowHints = not self.ShowHints
@@ -626,13 +664,8 @@ class SudokuMainFrame(wx.Frame):
             self.ToolBar.ToggleTool(self.__hintsbtid,self.ShowHints)
         assert((evt.Checked() and self.ShowHints) or not(evt.Checked() and self.ShowHints))
         self.SudokuGrid.ShowHints(self.ShowHints)
-        if evt.Checked():
-            print "showhints enabled"
-        else:
-            print "showhints dissabled"
 
     def OnChangeLanguage(self,evt):
-        print "Change language", self.__LangList[evt.GetId()]
         self.app.SetLanguage(self.__LangList[evt.GetId()])
         self._loadHelpTips()
         self._addMenus()

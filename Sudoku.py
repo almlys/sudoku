@@ -76,6 +76,12 @@ class NormalSudoku(SudokuType):
         self.sbr=rows_per_block
         self.sbc=cols_per_block
 
+    def __cmp__(self,other):
+        if isinstance(other,SudokuType) and len(self)==len(other) and self.getNumVars()==other.getNumVars():
+            return 0
+        else:
+            return 1
+
     def __len__(self):
         return self.getTotalNumCols()*self.getTotalNumRows()
 
@@ -209,6 +215,15 @@ class Grid(CoordinateInterface):
         CoordinateInterface.__init__(self,stype)
         self._buildUp()
         self._cells = self._make_cells()
+
+    def __cmp__(self,other):
+        if isinstance(other,Grid) and len(self)==len(other) and self.getNumVars()==other.getNumVars():
+            for i,c in enumerate(self._cells):
+                if other._cells[i].get()!=c.get():
+                    return 1
+            return 0
+        else:
+            return 1
 
     def _buildUp(self):
         # Blocks that restrict values (no repetition in cols, rows and boxes)

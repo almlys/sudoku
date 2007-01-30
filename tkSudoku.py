@@ -384,7 +384,6 @@ class SudokuFrame(tki.Frame):
         self.EnableUndo(True)
         self.EnableRedo(False)
         self.History.Stack(args)
-        print args
 
     # Actions
 
@@ -396,8 +395,13 @@ class SudokuFrame(tki.Frame):
 
     def _do_new(self):
         print "New"
+        bkgrid = Sudoku.Grid()
+        bkgrid.copy_values_from(self._grid)
+        void=Sudoku.Grid()
+        if bkgrid!=void:
+            self._history_callback("t",bkgrid,void)
         self._grid.reset()
-    
+
     def _do_loadFromFile(self):
         # TODO: Check errors !!!
         from tkFileDialog import askopenfilename
@@ -407,9 +411,13 @@ class SudokuFrame(tki.Frame):
         if not isinstance(filename, basestring): return # Exit if Cancel or Closed
         self.StatusBar.set(_("Opening %s, please wait...") %(filename,))
         try:
+            bkgrid = Sudoku.Grid()
+            bkgrid.copy_values_from(self._grid)
             grid=Sudoku.Grid()
             grid.load_from_file(filename)
             self._grid.copy_values_from(grid)
+            if bkgrid!=grid:
+                self._history_callback("t",bkgrid,grid)
         except Sudoku.Contradiction: # Dialog guarantees filename exists
             from tkMessageBox import showinfo
             showinfo(message=_("Invalid sudoku file"))
@@ -430,6 +438,8 @@ class SudokuFrame(tki.Frame):
         from tkMessageBox import showinfo
         try:
             f=urllib.urlopen(filename)
+            bkgrid = Sudoku.Grid()
+            bkgrid.copy_values_from(self._grid)
             grid=Sudoku.Grid()
             if filename.lower().endswith(".gpe"):
                 ftype="gpe"
@@ -437,6 +447,8 @@ class SudokuFrame(tki.Frame):
                 ftype="tsdk"
             grid.load_from_stream(f,ftype)
             self._grid.copy_values_from(grid)
+            if bkgrid!=grid:
+                self._history_callback("t",bkgrid,grid)
             f.close()
         except Sudoku.Contradiction:
             f.close()
@@ -468,10 +480,11 @@ class SudokuFrame(tki.Frame):
             bkgrid = Sudoku.Grid()
             bkgrid.copy_values_from(self._grid)
             self._grid.copy_values_from(solution)
+            if bkgrid!=solution:
+                self._history_callback("t",bkgrid,solution)
         self.StatusBar.set("")
 
     def _do_undo(self):
-        print "undo"
         self.EnableRedo(True)
         hist = self.History.Undo()
         if self.History.isEmpty():
@@ -485,12 +498,12 @@ class SudokuFrame(tki.Frame):
                 self._grid.set(idx,old)
         elif cmd=="t":
             # An entire Sudoku was stacked
-            pass
+            old, new = hist[1:]
+            self._grid.copy_values_from(old)
         else:
             raise NotImplemented
 
     def _do_redo(self):
-        print "redo"
         self.EnableUndo(True)
         hist = self.History.Redo()
         if self.History.isRedoEmpty():
@@ -501,6 +514,11 @@ class SudokuFrame(tki.Frame):
             self._grid.unset(idx)
             if new!=0:
                 self._grid.set(idx,new)
+        elif cmd=="t":
+            old, new = hist[1:]
+            self._grid.copy_values_from(new)
+        else:
+            raise NotImplemented
 
     def _do_changeLanguage(self, *args):
         print "change language %s" %(self.app_language.get())
