@@ -75,6 +75,8 @@ class NormalSudoku(SudokuType):
         self.c=col_blocks
         self.sbr=rows_per_block
         self.sbc=cols_per_block
+        self._rowsize=self.getTotalNumCols()
+        self._buildUp()
 
     def __cmp__(self,other):
         if isinstance(other,SudokuType) and len(self)==len(other) and self.getNumVars()==other.getNumVars():
@@ -85,75 +87,21 @@ class NormalSudoku(SudokuType):
     def __len__(self):
         return self.getTotalNumCols()*self.getTotalNumRows()
 
-    def getTotalNumRows(self):
-        """
-        Returns the total number of rows (or colum height)
-        """
-        return self.r*self.sbr
-
-    def getTotalNumCols(self):
-        """
-        Returns total length size (num cols) of a row
-        """
-        return self.c*self.sbc
-
-    def getBlockDimensions(self):
-        """
-        Returns the dimensions of a Sudoku Block
-        Height X Width (rows x cols)
-        """
-        return self.sbr,self.sbc
-
-    def getNumCols(self):
-        """
-        Returns the Total sudoku width (cols) in blocks
-        """
-        return self.c
-
-    def getNumRows(self):
-        """
-        Returns the Total sudoku height (rows) in blocks
-        """
-        return self.r
-
-    def getNumVars(self):
-        """
-        Returns the total number of possible vars for this Sudoku
-        """
-        return self.sbr*self.sbc
-        
-
-class SamuraiSudoku(NormalSudoku):
-
-    def __init__(self,row_blocks=3,col_blocks=3,rows_per_block=3,cols_per_block=3):
-        self.r=row_blocks*2+1
-        self.c=col_blocks*2+1
-        self.sbr=rows_per_block
-        self.sbc=cols_per_block
-
-# Auxiliary functions to transform cordinates on the grid
-
-class CoordinateInterface(object):
-    """
-    Defines a mixin with functions to transform coordinates on the grid
-    """
-
-    def __init__(self,stype=None):
-        if stype==None:
-            stype=NormalSudoku()
-        elif isinstance(stype,CoordinateInterface):
-            stype=stype._type
-        elif not isinstance(stype,SudokuType):
-            raise TypeError, "stype is neither a CoordinateInterface or a SudokuType"
-        self._type=stype
-        self._rowsize=self.getTotalNumCols()
-        self._cached_len=len(self._type)
-
-    def __getattr__(self,attr):
-        return getattr(self._type,attr)
-
-    def __len__(self):
-        return self._cached_len
+    def _buildUp(self):
+        # Blocks that restrict values (no repetition in cols, rows and boxes)
+        l=len(self)
+        nrt=self.r*self.sbr
+        nct=self.c*self.sbc
+        block_size=self.c * self.sbc * self.sbr
+    
+        self._rows = [[i for i in xrange(l) if self.i2r(i)==row]
+                      for row in xrange(nrt)]
+        self._cols = [[i for i in xrange(l) if self.i2c(i)==col]
+                      for col in xrange(nct)]
+        self._boxes = [[self.rc2i(row, col) + self.sbc * bcol + block_size * brow
+                        for row in xrange(self.sbr) for col in xrange(self.sbc)]
+                        for brow in xrange(self.r) for bcol in xrange(self.c)]
+        self._blocks = self._rows + self._cols + self._boxes
 
     def rc2i(self,row,col):
         return row * self._rowsize + col
@@ -204,6 +152,191 @@ class CoordinateInterface(object):
         else:
             raise TypeError, "Too many items in idx tuple"
 
+    def getTotalNumRows(self):
+        """
+        Returns the total number of rows (or colum height)
+        """
+        return self.r*self.sbr
+
+    def getTotalNumCols(self):
+        """
+        Returns total length size (num cols) of a row
+        """
+        return self.c*self.sbc
+
+    def getBlockDimensions(self):
+        """
+        Returns the dimensions of a Sudoku Block
+        Height X Width (rows x cols)
+        """
+        return self.sbr,self.sbc
+
+    def getNumCols(self):
+        """
+        Returns the Total sudoku width (cols) in blocks
+        """
+        return self.c
+
+    def getNumRows(self):
+        """
+        Returns the Total sudoku height (rows) in blocks
+        """
+        return self.r
+
+    def getNumVars(self):
+        """
+        Returns the total number of possible vars for this Sudoku
+        """
+        return self.sbr*self.sbc
+        
+
+class SamuraiSudoku(NormalSudoku):
+
+    def __init__(self,row_blocks=3,col_blocks=3,rows_per_block=3,cols_per_block=3):
+        self.r=row_blocks*2+1
+        self.c=col_blocks*2+1
+        self.sbr=rows_per_block
+        self.sbc=cols_per_block
+        self._rowsize=self.getTotalNumCols()
+        self._buildUp()
+        if row_blocks!=3 or col_blocks!=3:
+            raise NotImplemented, "Only 3x3 Samurai Sudokus are currently suported, sorry :("
+
+    def getSudokuId(self,idx):
+        nrt=self.r*self.sbr
+        nct=self.c*self.sbc
+        mcol=(nct-self.sbc)/2
+        mrow=(nrt-self.sbr)/2
+        mcol2=mcol+self.sbc
+        mrow2=mrow+self.sbr
+        mcolca=mcol-self.sbc
+        mrowca=mrow-self.sbr
+        mcolcb=mcol2+self.sbc
+        mrowcb=mrow2+self.sbr
+
+        row,col = self.t2rc(idx)
+        if row<mrowca:
+            if col<mcol:
+                return (1,)
+            elif col>=mcol2:
+                return (2,)
+            else:
+                return (0,)
+        elif row<mrow:
+            if col<mcolca:
+                return (1,)
+            elif col<mcol:
+                return (1,3)
+            elif col<mcol2:
+                return (3,)
+            elif col<mcolcb:
+                return (2,3)
+            else:
+                return (2,)
+        elif row<mrow2:
+            if col>=mcolca and col<mcolcb:
+                return (3,)
+            else:
+                return (0,)
+        elif row<mrowcb:
+            if col<mcolca:
+                return (4,)
+            elif col<mcol:
+                return (4,3)
+            elif col<mcol2:
+                return (3,)
+            elif col<mcolcb:
+                return (5,3)
+            else:
+                return (5,)
+        else:
+            if col<mcol:
+                return (4,)
+            elif col>=mcol2:
+                return (5,)
+            else:
+                return (0,)
+        
+
+##    def _buildUp(self):
+##        # Blocks that restrict values (no repetition in cols, rows and boxes)
+##        # Define for samurai
+##        l=len(self)
+##        nrt=self.r*self.sbr
+##        nct=self.c*self.sbc
+##        block_size=self.c * self.sbc * self.sbr
+##
+##        self._rows=[]
+##        self._cols=[]
+##        self._boxes=[]
+##
+##        mcol=(nct-self.sbc)/2
+##        mrow=(nrt-self.sbr)/2
+##
+##        mcol2=mcol+self.sbc-1
+##        mrow2=mrow+self.sbr-1
+##
+##        mcolca=mcol-self.sbc
+##        mrowca=mrow-self.sbr
+##        mcolcb=mcol2+self.sbc
+##        mrowcb=mrow2+self.sbr
+##
+##        # ROWS
+##        # 1 UL
+##        rows = [[i for i in xrange(l) if self.i2r(i)==row and self.i2c(i)<mcol]
+##                for row in xrange(mrow)]
+##        self._rows += rows
+##        # 2 UR
+##        rows = [[i for i in xrange(l) if self.i2r(i)==row and self.i2c(i)>mcol2]
+##                for row in xrange(mrow)]
+##        self._rows += rows
+##        # 3 C
+##        rows = [[i for i in xrange(l) if self.i2r(i)==row and self.i2c(i)<=mcolcb and self.i2c(i)>=mcolca]
+##                for row in xrange(mrowca-1,mrowcb)]
+##        self._rows += rows
+##        print self._rows
+##
+##        # 4 DL
+##
+##        # 5 DR
+##        
+##    
+##        #self._rows = [[i for i in xrange(l) if self.i2r(i)==row]
+##        #              for row in xrange(nrt)]
+##        self._cols = [[i for i in xrange(l) if self.i2c(i)==col]
+##                      for col in xrange(nct)]
+##        self._boxes = [[self.rc2i(row, col) + self.sbc * bcol + block_size * brow
+##                        for row in xrange(self.sbr) for col in xrange(self.sbc)]
+##                        for brow in xrange(self.r) for bcol in xrange(self.c)]
+##        self._blocks = self._rows + self._cols + self._boxes
+##
+##
+## There is a whole easier way to do it, and we are running out of time,
+## so let's do it ASAP.
+
+# Auxiliary functions to transform cordinates on the grid
+
+class CoordinateInterface(object):
+    """
+    Defines a mixin with functions to transform coordinates on the grid
+    """
+
+    def __init__(self,stype=None):
+        if stype==None:
+            stype=NormalSudoku()
+        elif isinstance(stype,CoordinateInterface):
+            stype=stype._type
+        elif not isinstance(stype,SudokuType):
+            raise TypeError, "stype is neither a CoordinateInterface or a SudokuType"
+        self._type=stype
+        self._cached_len=len(self._type)
+
+    def __getattr__(self,attr):
+        return getattr(self._type,attr)
+
+    def __len__(self):
+        return self._cached_len
+
 
 # Model classes
 
@@ -213,7 +346,6 @@ class Grid(CoordinateInterface):
 
     def __init__(self,stype=None):
         CoordinateInterface.__init__(self,stype)
-        self._buildUp()
         self._cells = self._make_cells()
 
     def __cmp__(self,other):
@@ -224,22 +356,6 @@ class Grid(CoordinateInterface):
             return 0
         else:
             return 1
-
-    def _buildUp(self):
-        # Blocks that restrict values (no repetition in cols, rows and boxes)
-        l=len(self)
-        nrt=self.r*self.sbr
-        nct=self.c*self.sbc
-        block_size=self.c * self.sbc * self.sbr
-    
-        self._rows = [[i for i in xrange(l) if self.i2r(i)==row]
-                      for row in xrange(nrt)]
-        self._cols = [[i for i in xrange(l) if self.i2c(i)==col]
-                      for col in xrange(nct)]
-        self._boxes = [[self.rc2i(row, col) + self.sbc * bcol + block_size * brow
-                        for row in xrange(self.sbr) for col in xrange(self.sbc)]
-                        for brow in xrange(self.r) for bcol in xrange(self.c)]
-        self._blocks = self._rows + self._cols + self._boxes
     
     def _make_cells(self):
         nvar=self.getNumVars()
@@ -255,12 +371,75 @@ class Grid(CoordinateInterface):
         """Sets value to the cell and propagates restrictions"""
         row, col = self.t2rc(idx)
         self._cells[self.rc2i(row, col)].set(value)
-        for rest in (self._rows[row],
-                     self._cols[col], 
-                     self._boxes[self.rc2b(row, col)]):
-            for index in rest:
-                if self._cells[index].get() == 0:
-                    self._cells[index].markImpossible(value)
+
+        if not isinstance(self._type,SamuraiSudoku):
+            for rest in (self._rows[row],
+                         self._cols[col], 
+                         self._boxes[self.rc2b(row, col)]):
+                for index in rest:
+                    if self._cells[index].get() == 0:
+                        self._cells[index].markImpossible(value)
+        else:
+            # Hardcoded ugly 3x3 Samurai Sudoku.
+            sid=self.getSudokuId((row,col))
+            if 1 in sid:
+                if 3 in sid:
+                    rs=0
+                    rf=15
+                    cs=0
+                    cf=15
+                else:
+                    rs=0
+                    rf=9
+                    cs=0
+                    cf=9
+            elif 2 in sid:
+                if 3 in sid:
+                    rs=6
+                    rf=21
+                    cs=0
+                    cf=15
+                else:
+                    rs=12
+                    rf=21
+                    cs=0
+                    cf=9
+            elif 4 in sid:
+                if 3 in sid:
+                    rs=0
+                    rf=15
+                    cs=6
+                    cf=21
+                else:
+                    rs=0
+                    rf=9
+                    cs=12
+                    cf=21
+            elif 5 in sid:
+                if 3 in sid:
+                    rs=6
+                    rf=21
+                    cs=6
+                    cf=21
+                else:
+                    rs=12
+                    rf=21
+                    cs=12
+                    cf=21
+            elif 3 in sid:
+                rs=6
+                rf=15
+                cs=6
+                cf=15
+            else:
+                return
+
+            for rest in (self._rows[row][rs:rf],
+                         self._cols[col][cs:cf], 
+                         self._boxes[self.rc2b(row, col)]):
+                for index in rest:
+                    if self._cells[index].get() == 0:
+                        self._cells[index].markImpossible(value)            
 
     def unset(self, idx):
         """UnSets value to the cell and propagates restrictions"""
@@ -307,7 +486,8 @@ class Grid(CoordinateInterface):
 
         
     def isSolved(self):
-        for cell in self._cells:
+        for idx,cell in enumerate(self._cells):
+            if isinstance(self._type,SamuraiSudoku) and 0 in self.getSudokuId((idx)): continue
             if cell.get() == 0: return False
         return True
 	
