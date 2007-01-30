@@ -595,7 +595,7 @@ class SudokuMainFrame(wx.Frame):
         if solution is None:
             wx.MessageBox(_("No solution has been found."),style=wx.ICON_INFORMATION,parent=self)
         else:
-            bkgrid = Sudoku.Grid()
+            bkgrid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
             bkgrid.copy_values_from(self.SudokuGrid._ModelGrid)
             self.SudokuGrid._ModelGrid.copy_values_from(solution)
             if bkgrid!=solution:
