@@ -79,7 +79,13 @@ class NormalSudoku(SudokuType):
         self._buildUp()
 
     def __cmp__(self,other):
-        if isinstance(other,SudokuType) and len(self)==len(other) and self.getNumVars()==other.getNumVars():
+        if (isinstance(other,SudokuType)
+            and len(self)==len(other)
+            and self.getNumVars()==other.getNumVars()
+            and self.r==other.r
+            and self.c==other.c
+            and self.sbr==other.sbr
+            and self.sbc==other.sbc):
             return 0
         else:
             return 1
@@ -349,7 +355,7 @@ class Grid(CoordinateInterface):
         self._cells = self._make_cells()
 
     def __cmp__(self,other):
-        if isinstance(other,Grid) and len(self)==len(other) and self.getNumVars()==other.getNumVars():
+        if isinstance(other,Grid) and self._type==other._type:
             for i,c in enumerate(self._cells):
                 if other._cells[i].get()!=c.get():
                     return 1
@@ -492,6 +498,7 @@ class Grid(CoordinateInterface):
         return True
 	
     def print_(self):
+        raise NotImplemented, "Needs update"
         for row in xrange(9):
             if row % 3 == 0: print '-' * 25
             for col in xrange(9):

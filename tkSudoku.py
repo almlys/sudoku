@@ -394,7 +394,6 @@ class SudokuFrame(tki.Frame):
             self.master.destroy()
 
     def _do_new(self):
-        print "New"
         bkgrid = Sudoku.Grid()
         bkgrid.copy_values_from(self._grid)
         void=Sudoku.Grid()
@@ -403,7 +402,7 @@ class SudokuFrame(tki.Frame):
         self._grid.reset()
 
     def _do_loadFromFile(self):
-        # TODO: Check errors !!!
+        # DONE: Check errors !!!
         from tkFileDialog import askopenfilename
         filename = askopenfilename(filetypes=((_("GPE files"),"*.gpe"),
                                                 (_("TSudoku files"),"*.tsdk"),
@@ -525,6 +524,10 @@ class SudokuFrame(tki.Frame):
         self.app.SetLanguage(self.app_language.get())
         self._create_menu()
         self._create_toolbar()
+        if not self.History.isEmpty():
+            self.EnableUndo()
+        if not self.History.isRedoEmpty():
+            self.EnableRedo()
 
     def _do_about(self):
         from tkMessageBox import showinfo

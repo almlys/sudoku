@@ -341,13 +341,15 @@ class SudokuMainFrame(wx.Frame):
         itm.SetBitmap(self._getMenuArt(wx.ART_UNDO))
         self.Bind(wx.EVT_MENU, self.OnUndo, itm)
         filemenu.AppendItem(itm)
-        itm.Enable(False)
+        if self.History.isEmpty():
+            itm.Enable(False)
 
         self.__redo=itm=wx.MenuItem(filemenu,wx.ID_ANY,_("&Redo")+ self._getAKey("redo"),self._getTip("redo"))
         itm.SetBitmap(self._getMenuArt(wx.ART_REDO))
         self.Bind(wx.EVT_MENU, self.OnRedo, itm)
         filemenu.AppendItem(itm)
-        itm.Enable(False)
+        if self.History.isRedoEmpty():
+            itm.Enable(False)
 
         self.MenuBar.Append(filemenu,_("&Sudoku"))
 
@@ -421,11 +423,13 @@ class SudokuMainFrame(wx.Frame):
         self.ToolBar.AddSeparator()
         itm=self.ToolBar.AddSimpleTool(wx.ID_ANY,self._getToolBarArt(wx.ART_UNDO),_("Undo"),self._getTip("undo"))
         self.__undobtid=itm.GetId()
-        self.ToolBar.EnableTool(itm.GetId(),False)
+        if self.History.isEmpty():
+            self.ToolBar.EnableTool(itm.GetId(),False)
         self.Bind(wx.EVT_TOOL, self.OnUndo, itm)
         itm=self.ToolBar.AddSimpleTool(wx.ID_ANY,self._getToolBarArt(wx.ART_REDO),_("Redo"),self._getTip("redo"))
         self.__redobtid=itm.GetId()
-        self.ToolBar.EnableTool(itm.GetId(),False)
+        if self.History.isRedoEmpty():
+            self.ToolBar.EnableTool(itm.GetId(),False)
         self.Bind(wx.EVT_TOOL, self.OnRedo, itm)
         self.ToolBar.AddSeparator()
         itm=self.ToolBar.AddCheckTool(wx.ID_ANY,self._getToolBarArt(wx.ART_INFORMATION),shortHelp=_("Show Hints"),longHelp=self._getTip("hints"))
@@ -507,7 +511,10 @@ class SudokuMainFrame(wx.Frame):
                 su=Sudoku.NormalSudoku(r,c,sbr,sbc)
             self.SetStatusText(_("Creating Sudoku, please wait...."))
             self.app.Yield()
-            self._addSudoku(su)
+            if su!=bkgrid._type:
+                self._addSudoku(su)
+            else:
+                self.SudokuGrid.Reset()
             emptygrid = Sudoku.Grid(su)
             if bkgrid!=emptygrid:
                 self._history_callback("t",bkgrid,emptygrid)
@@ -528,8 +535,10 @@ class SudokuMainFrame(wx.Frame):
             try:
                 bkgrid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
                 bkgrid.copy_values_from(self.SudokuGrid._ModelGrid)
-                grid=Sudoku.Grid()
+                grid=Sudoku.Grid() #TODO we must scan de file and get the Sudoku Type
                 grid.load_from_file(filep)
+                if grid._type!=bkgrid._type:
+                    self._addSudoku(grid._type)
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
                 if bkgrid!=grid:
                     self._history_callback("t",bkgrid,grid)
@@ -554,12 +563,14 @@ class SudokuMainFrame(wx.Frame):
                 f=urllib.urlopen(dlg.GetValue())
                 bkgrid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
                 bkgrid.copy_values_from(self.SudokuGrid._ModelGrid)
-                grid=Sudoku.Grid()
+                grid=Sudoku.Grid() #TODO we must scan de file and get the Sudoku Type
                 if dlg.GetValue().lower().endswith(".gpe"):
                     ftype="gpe"
                 else:
                     ftype="tsdk"
                 grid.load_from_stream(f,ftype)
+                if grid._type!=bkgrid._type:
+                    self._addSudoku(grid._type)
                 self.SudokuGrid._ModelGrid.copy_values_from(grid)
                 if bkgrid!=grid:
                     self._history_callback("t",bkgrid,grid)
