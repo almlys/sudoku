@@ -30,6 +30,7 @@
 import SudokuCommon
 import Sudoku
 import observer
+from thSolver import thSolver
 
 try:
     import wx
@@ -228,6 +229,7 @@ class SudokuMainFrame(wx.Frame):
         self.app=app
         self.SetMinSize((630,430))
         self.ShowHints=False
+        self._addSolver()
         self._initLayout()
 
     def _initLayout(self):
@@ -241,6 +243,7 @@ class SudokuMainFrame(wx.Frame):
         self._addSizer()
         self._addToolBar()
         self._addSudoku(Sudoku.NormalSudoku(3,3,3,3))
+        self.Solver.setGrid(self.SudokuGrid._ModelGrid)
 
     def _loadAccessKeys(self):
         # Put here something that gets the access keys from the system configuration
@@ -248,7 +251,7 @@ class SudokuMainFrame(wx.Frame):
         self.__accesskeys = {"new":"Ctrl+N","open":"Ctrl+O","open_url":"Ctrl+Shift+O",
                              "save":"Ctrl+S","exit":"Ctrl+Q","solve":"Ctrl+R",
                              "undo":"Ctrl+Z","redo":"Ctrl+Shift+Z","hints":"Ctrl+H",
-                             "console":"F12"}
+                             "console":"F12","ghint":"Ctrl+Shift+H"}
 
     def _loadHelpTips(self):
         self.__HelpTips = {"new":_("Creates a New Sudoku"),"open":_("Opens a Sudoku"),
@@ -263,7 +266,8 @@ class SudokuMainFrame(wx.Frame):
                            "help":_("Shows some documentation of how does work this thing"),
                            "update":_("Checks if you are running the latest version"),
                            "about":_("I need to explain what does this thing do?"),
-                           "console":_("Opens a Python Interactive console, It's that cool")
+                           "console":_("Opens a Python Interactive console, It's that cool"),
+                           "ghint":_("Gets a Hint")
                            }
 
     def _getAKey(self,key):
@@ -282,6 +286,9 @@ class SudokuMainFrame(wx.Frame):
 
     def _addHistory(self):
         self.History=SudokuCommon.History()
+
+    def _addSolver(self):
+        self.Solver=thSolver()
 
     def _addStatusBar(self):
         self.StatusBar = wx.StatusBar(self)
@@ -336,6 +343,13 @@ class SudokuMainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSolve, itm)
         filemenu.AppendItem(itm)
         filemenu.AppendSeparator()
+
+        itm=wx.MenuItem(filemenu,wx.ID_ANY,_("&Get Hint")+ self._getAKey("ghint"),self._getTip("ghint"))
+        #itm.SetBitmap(self._getMenuArt(wx.ART_TICK_MARK))
+        self.Bind(wx.EVT_MENU, self.OnGetHint, itm)
+        filemenu.AppendItem(itm)
+        filemenu.AppendSeparator()
+
 
         self.__undo=itm=wx.MenuItem(filemenu,wx.ID_ANY,_("&Undo")+ self._getAKey("undo"),self._getTip("undo"))
         itm.SetBitmap(self._getMenuArt(wx.ART_UNDO))
@@ -436,9 +450,13 @@ class SudokuMainFrame(wx.Frame):
         self.__hintsbtid=itm.GetId()
         self.ToolBar.ToggleTool(self.__hintsbtid,self.ShowHints)
         self.Bind(wx.EVT_TOOL, self.OnShowHints, itm)
+        self.ToolBar.AddSeparator()
+        itm=self.ToolBar.AddSimpleTool(wx.ID_ANY,self._getToolBarArt(wx.ART_HELP),_("Get Hint"),self._getTip("ghint"))
+        self.Bind(wx.EVT_TOOL, self.OnGetHint, itm)
         self.ToolBar.Realize()
         self.Sizer.Remove(0)
         self.Sizer.Insert(0,self.ToolBar,flag=wx.EXPAND)
+
 
     def _addSudoku(self,type=None):
         self.Freeze()
@@ -479,6 +497,7 @@ class SudokuMainFrame(wx.Frame):
         self.EnableUndo(True)
         self.EnableRedo(False)
         self.History.Stack(args)
+        self.Solver.setGrid(self.SudokuGrid._ModelGrid)
 
     # Actions
 
@@ -597,12 +616,13 @@ class SudokuMainFrame(wx.Frame):
         self.SetStatusText(_("Solving Sudoku, please wait...."))
         self.app.Yield()
 
-        try:
-            grid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
-            grid.copy_values_from(self.SudokuGrid._ModelGrid)
-            solution = Sudoku.solve(grid)
-        except Sudoku.Contradiction:
-            solution = None
+##        try:
+##            grid = Sudoku.Grid(self.SudokuGrid._ModelGrid)
+##            grid.copy_values_from(self.SudokuGrid._ModelGrid)
+##            solution = Sudoku.solve(grid)
+##        except Sudoku.Contradiction:
+##            solution = None
+        solution = self.Solver.waitForSolution()
         if solution is None:
             wx.MessageBox(_("No solution has been found."),style=wx.ICON_INFORMATION,parent=self)
         else:
@@ -611,6 +631,26 @@ class SudokuMainFrame(wx.Frame):
             self.SudokuGrid._ModelGrid.copy_values_from(solution)
             if bkgrid!=solution:
                 self._history_callback("t",bkgrid,solution)
+
+        self.SetStatusText("")
+
+    def OnGetHint(self,evt):
+        if self.SudokuGrid._ModelGrid.isSolved(): return
+
+        self.SetStatusText(_("Solving Sudoku, please wait...."))
+        self.app.Yield()
+
+        solution = self.Solver.getHint()
+        if solution is None:
+            wx.MessageBox(_("I can't get a hint, because this Sudoku does not have any solution."),
+                          style=wx.ICON_INFORMATION,parent=self)
+        else:
+            idx, var = solution
+            while self.SudokuGrid._ModelGrid._cells[idx].get()==var:
+                idx, var = self.Solver.getHint()
+
+            self.SudokuGrid._ModelGrid.set(idx,var)
+            self._history_callback("s",idx,0,var)
 
         self.SetStatusText("")
 
@@ -643,6 +683,7 @@ class SudokuMainFrame(wx.Frame):
             self.SudokuGrid._ModelGrid.copy_values_from(old)
         else:
             raise NotImplemented
+        self.Solver.setGrid(self.SudokuGrid._ModelGrid)
 
 
     def OnRedo(self,evt):
@@ -666,6 +707,8 @@ class SudokuMainFrame(wx.Frame):
             self.SudokuGrid._ModelGrid.copy_values_from(new)
         else:
             raise NotImplemented
+        self.Solver.setGrid(self.SudokuGrid._ModelGrid)
+
 
     def OnShowHints(self,evt):
         self.ShowHints = not self.ShowHints

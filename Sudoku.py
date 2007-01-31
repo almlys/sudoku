@@ -59,7 +59,6 @@ try:
     set
 except NameError:
     from sets import Set as set
-from copy import deepcopy
 
 # Suported Sudoku types
 
@@ -353,6 +352,8 @@ class Grid(CoordinateInterface):
     def __init__(self,stype=None):
         CoordinateInterface.__init__(self,stype)
         self._cells = self._make_cells()
+        if stype!=None and isinstance(stype,Grid):
+            self.copy_values_from(stype)
 
     def __cmp__(self,other):
         if isinstance(other,Grid) and self._type==other._type:
@@ -362,6 +363,17 @@ class Grid(CoordinateInterface):
             return 0
         else:
             return 1
+
+    def contains(self,other):
+        """ Determines if other is inside this sudoku """
+        if isinstance(other,Grid) and self._type==other._type:
+            for i,c in enumerate(self._cells):
+                if other._cells[i].get()!=0 and other._cells[i].get()!=c.get():
+                    return False
+            return True
+        else:
+            return False
+        
     
     def _make_cells(self):
         nvar=self.getNumVars()
@@ -545,66 +557,4 @@ class Cell(object):
     
     def isUndecided(self):
         return self._value == 0 and len(self._possibls) > 1
-
-# Solver functions
-
-def solve(grid):
-    stack = [grid]
-    while not len(stack) == 0:
-        current = stack.pop()
-        try:
-            applyHeuristics(current)
-        except Contradiction:
-            continue
-        if current.isSolved():
-            return current
-        row, col, values = findBranchingCell(current)
-        for value in values:
-            new_grid = deepcopy(current)
-            new_grid.set((row,col),value)
-            stack.append(new_grid)
-    return None
-
-def applyHeuristics(grid): 
-    while(True):
-        for heuristic in (getSingletons, getUniques):
-            deduced =  heuristic(grid)
-            if len(deduced) != 0: break # getS more efficient than getU
-        if len(deduced) == 0:
-            return
-        for row, col, value in deduced:
-            grid.set((row, col), value)
-
-def getSingletons(grid):
-    return [(grid.i2r(i), grid.i2c(i), grid._cells[i].getPossibleValues()[0])
-            for i in xrange(len(grid)) if grid._cells[i].isSingleton()]
-
-def getUniques(grid):
-    result = []
-    for block in grid._blocks:
-        for i, index in enumerate(block):
-            if grid._cells[index].isUndecided():
-                possibilities = set(grid._cells[index].getPossibleValues())
-                for j in block[:i] + block[i+1:]:
-                    possibilities -= set(grid._cells[j].getPossibleValues())
-                if len(possibilities) == 1:
-                    result.append((grid.i2r(index), grid.i2c(index), possibilities.pop()))
-    return result
-
-def findBranchingCell(grid):
-    # Workaround for anyone attempting to solve an empty Sudoku
-    minindex = 0
-    minvalues = [1,]
-    # End workaround
-    minspan = grid.getNumVars() # was 9 for an 3 3 3 3 sudoku
-    for index in xrange(len(grid)):
-        if grid._cells[index].isUndecided():
-            values = grid._cells[index].getPossibleValues()
-            if len(values) < minspan:
-                minspan = len(values)
-                minvalues = values
-                minindex = index
-                if minspan ==2: break
-    return grid.i2r(minindex), grid.i2c(minindex), minvalues 
-	
 
