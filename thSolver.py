@@ -91,4 +91,8 @@ class thSolver(object):
             var=solution._cells[idx].get()
         return idx,var
 
-
+    def Terminate(self):
+        if self.solver!=None and self.solver.isAlive():
+            self.solver.stop()
+            self.solver.join()
+        

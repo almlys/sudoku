@@ -510,6 +510,7 @@ class SudokuMainFrame(wx.Frame):
                     evt.Veto()
                 return
         self.Destroy()
+        self.Solver.Terminate()
 
     def OnNew(self,evt):
         #self.SudokuGrid.Reset()

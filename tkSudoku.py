@@ -60,6 +60,7 @@ import tkFont
 import SudokuCommon
 import Sudoku
 import observer
+from thSolver import thSolver
 
 
 # View classes
@@ -228,12 +229,18 @@ class SudokuFrame(tki.Frame):
     def __init__(self, app):
         tki.Frame.__init__(self,app.root)
         self.app=app
+        self._create_solver()
         self._bind_callbacks()
         self._create_tki_vars()
         self._create_history()
         self._create_view()
         self._create_model()
         self._connect()
+        self.Solver.setGrid(self._grid)
+
+    def _create_solver(self):
+        self.Solver=thSolver()
+        
 
     def _bind_callbacks(self):
         self.master.protocol("WM_DELETE_WINDOW", self._do_exit)
@@ -276,6 +283,8 @@ class SudokuFrame(tki.Frame):
         sudomenu = tki.Menu(self.menu)
         self.menu.add_cascade(label=_("Sudoku"), menu=sudomenu)
         sudomenu.add_command(label=_("Solve"), command=self._do_solve)
+        sudomenu.add_separator()
+        sudomenu.add_command(label=_("Get Hint"), command=self._do_getHint)
         sudomenu.add_separator()
         sudomenu.add_command(label=_("Undo"), command=self._do_undo, state=tki.DISABLED)
         sudomenu.add_command(label=_("Redo"), command=self._do_redo, state=tki.DISABLED)
@@ -338,6 +347,11 @@ class SudokuFrame(tki.Frame):
                                  command=self._do_redo,
                                  state=tki.DISABLED)
         self._redobtn.pack(side=tki.LEFT)
+
+        tki.Button(self.ToolBar,
+                   text=_("Get Hint"),
+                   bitmap="questhead",
+                   command=self._do_getHint).pack(side=tki.LEFT)
         
         tki.Checkbutton(self.ToolBar,
                         text=_("Show Hints"),
@@ -367,23 +381,24 @@ class SudokuFrame(tki.Frame):
     def EnableUndo(self,enabled=True):
         if enabled:
             self._undobtn.config(state=tki.NORMAL)
-            self._sudomenu.entryconfigure(3,state=tki.NORMAL)
+            self._sudomenu.entryconfigure(5,state=tki.NORMAL)
         else:
             self._undobtn.config(state=tki.DISABLED)
-            self._sudomenu.entryconfigure(3,state=tki.DISABLED)
+            self._sudomenu.entryconfigure(5,state=tki.DISABLED)
 
     def EnableRedo(self,enabled=True):
         if enabled:
             self._redobtn.config(state=tki.NORMAL)
-            self._sudomenu.entryconfig(4,state=tki.NORMAL)
+            self._sudomenu.entryconfig(6,state=tki.NORMAL)
         else:
             self._redobtn.config(state=tki.DISABLED)
-            self._sudomenu.entryconfig(4,state=tki.DISABLED)
+            self._sudomenu.entryconfig(6,state=tki.DISABLED)
     
     def _history_callback(self,*args):
         self.EnableUndo(True)
         self.EnableRedo(False)
         self.History.Stack(args)
+        self.Solver.setGrid(self._grid)
 
     # Actions
 
@@ -392,6 +407,7 @@ class SudokuFrame(tki.Frame):
         if askokcancel(title=_("Are you sure?"),
                                     message=_("Are you really sure that you wish to quit?")):
             self.master.destroy()
+            self.Solver.Terminate()
 
     def _do_new(self):
         bkgrid = Sudoku.Grid()
@@ -466,12 +482,13 @@ class SudokuFrame(tki.Frame):
 
     def _do_solve(self):
         self.StatusBar.set(_("Solving Sudoku, please wait...."))
-        try:
-            grid = Sudoku.Grid()
-            grid.copy_values_from(self._grid)
-            solution = Sudoku.solve(grid)
-        except Sudoku.Contradiction:
-            solution = None
+        solution = self.Solver.waitForSolution()
+##        try:
+##            grid = Sudoku.Grid()
+##            grid.copy_values_from(self._grid)
+##            solution = Sudoku.solve(grid)
+##        except Sudoku.Contradiction:
+##            solution = None
         if solution is None:
             from tkMessageBox import showinfo
             showinfo(message=_("No solution has been found."))
@@ -482,6 +499,26 @@ class SudokuFrame(tki.Frame):
             if bkgrid!=solution:
                 self._history_callback("t",bkgrid,solution)
         self.StatusBar.set("")
+
+    def _do_getHint(self):
+        if self._grid.isSolved(): return
+
+        self.StatusBar.set(_("Solving Sudoku, please wait...."))
+
+        solution = self.Solver.getHint()
+        if solution is None:
+            from tkMessageBox import showinfo
+            showinfo(message=_("I can't get a hint, because this Sudoku does not have any solution."))
+        else:
+            idx, var = solution
+            while self._grid._cells[idx].get()==var:
+                idx, var = self.Solver.getHint()
+
+            self._grid.set(idx,var)
+            self._history_callback("s",idx,0,var)
+
+        self.StatusBar.set("")
+
 
     def _do_undo(self):
         self.EnableRedo(True)
@@ -501,6 +538,7 @@ class SudokuFrame(tki.Frame):
             self._grid.copy_values_from(old)
         else:
             raise NotImplemented
+        self.Solver.setGrid(self._grid)
 
     def _do_redo(self):
         self.EnableUndo(True)
@@ -518,6 +556,7 @@ class SudokuFrame(tki.Frame):
             self._grid.copy_values_from(new)
         else:
             raise NotImplemented
+        self.Solver.setGrid(self._grid)
 
     def _do_changeLanguage(self, *args):
         print "change language %s" %(self.app_language.get())
