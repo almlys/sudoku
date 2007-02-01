@@ -25,8 +25,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: $Id$\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-02-01 02:33+0100\n"
-"PO-Revision-Date: 2007-01-29 15:52+0100\n"
+"POT-Creation-Date: 2007-02-01 02:50+0100\n"
+"PO-Revision-Date: 2007-02-01 02:50+0100\n"
 "Last-Translator: Alberto Montañola Lacort <alberto@almlys.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -122,7 +122,7 @@ msgstr "Abre una consola Python interactiva"
 
 #: wxSudoku.py:270
 msgid "Gets a Hint"
-msgstr ""
+msgstr "Obtiene una pista"
 
 #: wxSudoku.py:310
 msgid "&New..."
@@ -149,9 +149,8 @@ msgid "&Solve"
 msgstr "&Solucionar"
 
 #: wxSudoku.py:347
-#, fuzzy
 msgid "&Get Hint"
-msgstr "&Mostrar Pistas"
+msgstr "&Obtener pista"
 
 #: wxSudoku.py:354
 msgid "&Undo"
@@ -215,7 +214,7 @@ msgstr "Mostrar Pistas"
 
 #: wxSudoku.py:454 tkSudoku.py:287 tkSudoku.py:352
 msgid "Get Hint"
-msgstr ""
+msgstr "Obtener pista"
 
 #: wxSudoku.py:506 tkSudoku.py:408
 msgid "Are you really sure that you wish to quit?"
@@ -225,7 +224,7 @@ msgstr "¿Estas completamente seguro que deseas salir?"
 msgid "Are you sure?"
 msgstr "¿Está usted seguro?"
 
-#: wxSudoku.py:528 wxNewSudokuDialog.py:38 wxNewSudokuDialog.py:100
+#: wxSudoku.py:528 wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:102
 msgid "Samurai"
 msgstr "Samurai"
 
@@ -299,6 +298,7 @@ msgstr "No se ha encontrado ninguna solución"
 #: wxSudoku.py:646 tkSudoku.py:511
 msgid "I can't get a hint, because this Sudoku does not have any solution."
 msgstr ""
+"No puedo obtener una pista, porque este Sudoku no tiene ninguna solución"
 
 #: wxSudoku.py:739
 msgid "Launching Shell..."
@@ -345,59 +345,59 @@ msgstr "Acerca de..."
 msgid "Load"
 msgstr "Cargar"
 
-#: BaseApp.py:115
+#: BaseApp.py:125
 msgid "English"
 msgstr "Inglés"
 
-#: BaseApp.py:115
+#: BaseApp.py:125
 msgid "Spanish"
 msgstr "Español"
 
-#: BaseApp.py:115
+#: BaseApp.py:125
 msgid "Catalan"
 msgstr "Catalán"
 
-#: wxNewSudokuDialog.py:37
+#: wxNewSudokuDialog.py:39
 msgid "Type"
 msgstr "Tipo"
 
-#: wxNewSudokuDialog.py:38
+#: wxNewSudokuDialog.py:40
 msgid "Normal"
 msgstr "Normal"
 
-#: wxNewSudokuDialog.py:39
+#: wxNewSudokuDialog.py:41
 msgid "Block Size"
 msgstr "Tamaño del bloque"
 
-#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+#: wxNewSudokuDialog.py:42 wxNewSudokuDialog.py:44
 msgid "2"
 msgstr "2"
 
-#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+#: wxNewSudokuDialog.py:42 wxNewSudokuDialog.py:44
 msgid "3"
 msgstr "3"
 
-#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+#: wxNewSudokuDialog.py:42 wxNewSudokuDialog.py:44
 msgid "4"
 msgstr "4"
 
-#: wxNewSudokuDialog.py:41
+#: wxNewSudokuDialog.py:43
 msgid "X"
 msgstr "X"
 
-#: wxNewSudokuDialog.py:43
+#: wxNewSudokuDialog.py:45
 msgid "&Ok"
 msgstr "&Ok"
 
-#: wxNewSudokuDialog.py:44
+#: wxNewSudokuDialog.py:46
 msgid "&Cancel"
 msgstr "&Cancel"
 
-#: wxNewSudokuDialog.py:57
+#: wxNewSudokuDialog.py:59
 msgid "Create New Sudoku"
 msgstr "Crea un nuevo Sudoku"
 
-#: SudokuCommon.py:119
+#: SudokuCommon.py:121
 #, python-format
 msgid ""
 "\n"
@@ -440,7 +440,7 @@ msgstr ""
 "more details.\n"
 "\n"
 
-#: SudokuCommon.py:139
+#: SudokuCommon.py:141
 #, python-format
 msgid "About %s"
 msgstr "Acerca de %s"

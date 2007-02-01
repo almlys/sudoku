@@ -25,7 +25,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: $Id$\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-02-01 02:33+0100\n"
+"POT-Creation-Date: 2007-02-01 02:50+0100\n"
 "PO-Revision-Date: 2007-01-10 00:56+0100\n"
 "Last-Translator: Alberto Montañola Lacort <alberto@almlys.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -213,7 +213,7 @@ msgstr ""
 msgid "Are you sure?"
 msgstr ""
 
-#: wxSudoku.py:528 wxNewSudokuDialog.py:38 wxNewSudokuDialog.py:100
+#: wxSudoku.py:528 wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:102
 msgid "Samurai"
 msgstr ""
 
@@ -328,59 +328,59 @@ msgstr ""
 msgid "Load"
 msgstr ""
 
-#: BaseApp.py:115
+#: BaseApp.py:125
 msgid "English"
 msgstr ""
 
-#: BaseApp.py:115
+#: BaseApp.py:125
 msgid "Spanish"
 msgstr ""
 
-#: BaseApp.py:115
+#: BaseApp.py:125
 msgid "Catalan"
 msgstr ""
 
-#: wxNewSudokuDialog.py:37
+#: wxNewSudokuDialog.py:39
 msgid "Type"
 msgstr ""
 
-#: wxNewSudokuDialog.py:38
+#: wxNewSudokuDialog.py:40
 msgid "Normal"
 msgstr ""
 
-#: wxNewSudokuDialog.py:39
+#: wxNewSudokuDialog.py:41
 msgid "Block Size"
 msgstr ""
 
-#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+#: wxNewSudokuDialog.py:42 wxNewSudokuDialog.py:44
 msgid "2"
 msgstr ""
 
-#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+#: wxNewSudokuDialog.py:42 wxNewSudokuDialog.py:44
 msgid "3"
 msgstr ""
 
-#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+#: wxNewSudokuDialog.py:42 wxNewSudokuDialog.py:44
 msgid "4"
 msgstr ""
 
-#: wxNewSudokuDialog.py:41
+#: wxNewSudokuDialog.py:43
 msgid "X"
 msgstr ""
 
-#: wxNewSudokuDialog.py:43
+#: wxNewSudokuDialog.py:45
 msgid "&Ok"
 msgstr ""
 
-#: wxNewSudokuDialog.py:44
+#: wxNewSudokuDialog.py:46
 msgid "&Cancel"
 msgstr ""
 
-#: wxNewSudokuDialog.py:57
+#: wxNewSudokuDialog.py:59
 msgid "Create New Sudoku"
 msgstr ""
 
-#: SudokuCommon.py:119
+#: SudokuCommon.py:121
 #, python-format
 msgid ""
 "\n"
@@ -404,7 +404,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: SudokuCommon.py:139
+#: SudokuCommon.py:141
 #, python-format
 msgid "About %s"
 msgstr ""

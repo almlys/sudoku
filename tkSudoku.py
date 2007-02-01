@@ -423,7 +423,7 @@ class SudokuFrame(tki.Frame):
         filename = askopenfilename(filetypes=((_("GPE files"),"*.gpe"),
                                                 (_("TSudoku files"),"*.tsdk"),
                                                 (_("All Files"), "*")))
-        if not isinstance(filename, basestring): return # Exit if Cancel or Closed
+        if not isinstance(filename, basestring) or filename=="": return # Exit if Cancel or Closed
         self.StatusBar.set(_("Opening %s, please wait...") %(filename,))
         try:
             bkgrid = Sudoku.Grid()
