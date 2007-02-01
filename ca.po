@@ -1,0 +1,432 @@
+#
+# $Id$
+#
+#    Copyright (C) 2007 Alberto Montañola Lacort
+#    See the file AUTHORS for more info
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+#    USA.
+#
+#    Please see the file COPYING for the full license.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: $Id$\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-01-29 15:53+0100\n"
+"PO-Revision-Date: 2007-01-29 15:53+0100\n"
+"Last-Translator: Alberto Montañola Lacort <alberto@almlys.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: wxSudoku.py:40
+msgid ""
+"\n"
+"WxPython 2.6 or higher is required to run this application!!!\n"
+"\n"
+"You can get it from http://www.wxpython.org\n"
+"\n"
+"Or you can just type as root \"apt-get install python-wxgtk2.6\" on Debian, "
+"Ubuntu and any other Debian based distros\n"
+"On other distros you may try similar commands, yum, urpmi, emerge,..., just "
+"check your Distro documentation\n"
+"but if you don't have root access you will need to manually install wxPython "
+"in your home directory, have fun!\n"
+msgstr ""
+"\n"
+"Es requereix WxPython 2.6 o superior per poder executar l'aplicació!!!\n"
+"\n"
+"La pots obtenir de http://www.wxpython.org\n"
+"\n"
+"O pots escriure \"apt-get install python-wxgtk2.6\" com a root a Debian, "
+"Ubuntu i qualsevol altra distribució basada en Debian\n"
+"En altres distribucions pots triar comandes similars com yum, urpmi, "
+"emerge,.... Comprova la documentació de la teva distribució.\n"
+"Però si no tens accés de root, hauràs d'Instal·lar wxPython manualment al "
+"teu directori home.\n"
+
+#: wxSudoku.py:298
+msgid "Creates a New Sudoku"
+msgstr "Crea un nou Sudoku"
+
+#: wxSudoku.py:298
+msgid "Opens a Sudoku"
+msgstr "Obre un Sudoku"
+
+#: wxSudoku.py:299
+msgid "Opens a Sudoku from a Web server"
+msgstr "Obre un Sudoku des d'un servidor web"
+
+#: wxSudoku.py:300
+msgid "Saves a Sudoku"
+msgstr "Guarda un Sudoku"
+
+#: wxSudoku.py:300
+msgid "The application terminates"
+msgstr "La aplicació termina"
+
+#: wxSudoku.py:301
+msgid "Solves the Sudoku (I thought that you were smart!)"
+msgstr "Soluciona el Sudoku"
+
+#: wxSudoku.py:302
+msgid "Goes back to the past, well, it undoes your latest mess"
+msgstr "Desfà l'última acció"
+
+#: wxSudoku.py:303
+msgid "Redoes your latest undo"
+msgstr "Refà l'última acció desfeta"
+
+#: wxSudoku.py:304
+msgid "It shows you some helpful information"
+msgstr "Mostra informació molt útil"
+
+#: wxSudoku.py:305
+#, python-format
+msgid "Changes your app language to %s"
+msgstr "Canvia l'idioma de l'aplicació a %s"
+
+#: wxSudoku.py:306
+msgid "It allows you to change the language"
+msgstr "Et permet canviar l'idioma"
+
+#: wxSudoku.py:307
+msgid "Shows some documentation of how does work this thing"
+msgstr "Mostra documentació de com funciona aquesta cosa"
+
+#: wxSudoku.py:308
+msgid "Checks if you are running the latest version"
+msgstr "Comprova si esteu executant l'última versió"
+
+#: wxSudoku.py:309
+msgid "I need to explain what does this thing do?"
+msgstr "Necessito explicar que fa açò?"
+
+#: wxSudoku.py:310
+msgid "Opens a Python Interactive console, It's that cool"
+msgstr "Obre una consola Python interactiva"
+
+#: wxSudoku.py:344
+msgid "&New..."
+msgstr "&Nou..."
+
+#: wxSudoku.py:349
+msgid "&Open..."
+msgstr "&Obrir..."
+
+#: wxSudoku.py:354
+msgid "&Open URL..."
+msgstr "&Obrir adreça..."
+
+#: wxSudoku.py:366
+msgid "&Exit"
+msgstr "Sortir"
+
+#: wxSudoku.py:371
+msgid "&File"
+msgstr "&Fitxer"
+
+#: wxSudoku.py:375
+msgid "&Solve"
+msgstr "&Solucionar"
+
+#: wxSudoku.py:381
+msgid "&Undo"
+msgstr "&Desfer"
+
+#: wxSudoku.py:387
+msgid "&Redo"
+msgstr "&Refer"
+
+#: wxSudoku.py:393
+msgid "&Sudoku"
+msgstr "&Sudoku"
+
+#: wxSudoku.py:397
+msgid "&Show Hints"
+msgstr "&Mostrar pistes"
+
+#: wxSudoku.py:416
+msgid "&Change Language"
+msgstr "&Canviar Idioma"
+
+#: wxSudoku.py:417
+msgid "&Options"
+msgstr "&Opcions"
+
+#: wxSudoku.py:433
+msgid "&Console..."
+msgstr "&Consola..."
+
+#: wxSudoku.py:439
+msgid "&About..."
+msgstr "&Sobre..."
+
+#: wxSudoku.py:443
+msgid "&Help"
+msgstr "&Ajuda"
+
+#: wxSudoku.py:453 tkSudoku.py:269
+msgid "New..."
+msgstr "Nou"
+
+#: wxSudoku.py:455 tkSudoku.py:270
+msgid "Open..."
+msgstr "Obrir"
+
+#: wxSudoku.py:460 tkSudoku.py:278 tkSudoku.py:327
+msgid "Solve"
+msgstr "Solucionar"
+
+#: wxSudoku.py:463 tkSudoku.py:280 tkSudoku.py:331
+msgid "Undo"
+msgstr "Desfer"
+
+#: wxSudoku.py:467 tkSudoku.py:281 tkSudoku.py:336
+msgid "Redo"
+msgstr "Refer"
+
+#: wxSudoku.py:472 tkSudoku.py:285 tkSudoku.py:342
+msgid "Show Hints"
+msgstr "Mostrar pistes"
+
+#: wxSudoku.py:515 tkSudoku.py:386
+msgid "Are you really sure that you wish to quit?"
+msgstr "Esteu completament segurs de que voleu sortir?"
+
+#: wxSudoku.py:516 tkSudoku.py:385
+msgid "Are you sure?"
+msgstr "Esteu segur de la seva decisió?"
+
+#: wxSudoku.py:535 wxNewSudokuDialog.py:38 wxNewSudokuDialog.py:100
+msgid "Samurai"
+msgstr "Samurai"
+
+#: wxSudoku.py:539
+msgid "Creating Sudoku, please wait...."
+msgstr "Creant Sudoku, si us plau esperi..."
+
+#: wxSudoku.py:548 tkSudoku.py:396
+msgid "GPE files"
+msgstr "Fitxers GPE"
+
+#: wxSudoku.py:549 tkSudoku.py:397
+msgid "TSudoku files"
+msgstr "Fitxers TSudoku"
+
+#: wxSudoku.py:550 tkSudoku.py:398
+msgid "All Files"
+msgstr "Tots els fitxers"
+
+#: wxSudoku.py:554 wxSudoku.py:574 tkSudoku.py:400 tkSudoku.py:420
+#, python-format
+msgid "Opening %s, please wait..."
+msgstr "Obrint %s, si us plau esperi..."
+
+#: wxSudoku.py:561 wxSudoku.py:565 wxSudoku.py:589 wxSudoku.py:599
+#: tkSudoku.py:407 tkSudoku.py:435
+msgid "Invalid sudoku file"
+msgstr "Fitxers Sudoku invalid"
+
+#: wxSudoku.py:564 wxSudoku.py:598 tkSudoku.py:411 tkSudoku.py:444
+#, python-format
+msgid ""
+"Malformed, unconsistent, or unexistent file.\n"
+"%s"
+msgstr ""
+"Fitxer mal formatat, inconsistent, o inexistent.\n"
+"%s"
+
+#: wxSudoku.py:571 tkSudoku.py:417
+msgid "Enter the URL"
+msgstr "Entra l'adreça URL"
+
+#: wxSudoku.py:592 tkSudoku.py:437
+#, python-format
+msgid ""
+"The server said:\n"
+"%s\n"
+"Requesting the %s resource"
+msgstr ""
+"El servidor ha dit:\n"
+"%s\n"
+"Demanant el recurs %s"
+
+#: wxSudoku.py:593 tkSudoku.py:438
+msgid "Remote server error"
+msgstr "Error remot del servidor"
+
+#: wxSudoku.py:596 tkSudoku.py:440
+#, python-format
+msgid "Cannot open %s, reason %s"
+msgstr "No puc obrir %s, raó %s"
+
+#: wxSudoku.py:606 tkSudoku.py:449
+msgid "Solving Sudoku, please wait...."
+msgstr "Solucionant Sudoku, si us plau esperi..."
+
+#: wxSudoku.py:610 tkSudoku.py:458
+msgid "No solution has been found."
+msgstr "No s'ha trobat cap solució"
+
+#: wxSudoku.py:651
+msgid "Launching Shell..."
+msgstr "Llançant Shell..."
+
+#: wxSudoku.py:657
+#, python-format
+msgid "Failed launching shell, reason %s"
+msgstr "El llançament del Shell ha fracasat, raó %s"
+
+#: tkSudoku.py:268
+msgid "File"
+msgstr "Fitxer"
+
+#: tkSudoku.py:271
+msgid "Open URL..."
+msgstr "Obrir adreça..."
+
+#: tkSudoku.py:274
+msgid "Exit"
+msgstr "Sortir"
+
+#: tkSudoku.py:277
+msgid "Sudoku"
+msgstr "Sudoku"
+
+#: tkSudoku.py:284
+msgid "Options"
+msgstr "Opcions"
+
+#: tkSudoku.py:288
+msgid "Change Language"
+msgstr "Canviar Idioma"
+
+#: tkSudoku.py:299
+msgid "Help"
+msgstr "Ajuda"
+
+#: tkSudoku.py:303
+msgid "About..."
+msgstr "Sobre..."
+
+#: tkSudoku.py:323
+msgid "Load"
+msgstr "Obrir"
+
+#: BaseApp.py:115
+msgid "English"
+msgstr "Anglès"
+
+#: BaseApp.py:115
+msgid "Spanish"
+msgstr "Espanyol"
+
+#: BaseApp.py:115
+msgid "Catalan"
+msgstr "Català"
+
+#: wxNewSudokuDialog.py:37
+msgid "Type"
+msgstr "Tipus"
+
+#: wxNewSudokuDialog.py:38
+msgid "Normal"
+msgstr "Normal"
+
+#: wxNewSudokuDialog.py:39
+msgid "Block Size"
+msgstr "Mida del bloc"
+
+#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+msgid "2"
+msgstr "2"
+
+#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+msgid "3"
+msgstr "3"
+
+#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+msgid "4"
+msgstr "4"
+
+#: wxNewSudokuDialog.py:41
+msgid "X"
+msgstr "X"
+
+#: wxNewSudokuDialog.py:43
+msgid "&Ok"
+msgstr "&Ok"
+
+#: wxNewSudokuDialog.py:44
+msgid "&Cancel"
+msgstr "&Cancel"
+
+#: wxNewSudokuDialog.py:57
+msgid "Create New Sudoku"
+msgstr "Crea un nou Sudoku"
+
+#: SudokuCommon.py:119
+#, python-format
+msgid ""
+"\n"
+"Al's WxWidgets Python Sudoku.\n"
+"Another Sudoku solver, written 100%% in Python and wxWidgets.\n"
+"\n"
+"Version: %s\n"
+"\n"
+"Original Author: Copyright (c) 2006 Juan Manuel Gimeno Illa\n"
+"Current Author: Copyright (C) 2007 Alberto Montañola Lacort\n"
+"\n"
+"This program is free software; you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation; either version 2 of the License, or (at your option) "
+"any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for "
+"more details.\n"
+"\n"
+msgstr ""
+"\n"
+"Al's WxWidgets Python Sudoku.\n"
+"Un altre solver de Sudoku, escrit 100%% en Python i wxWidgets.\n"
+"\n"
+"Versió: %s\n"
+"\n"
+"Autor Original: Copyright (c) 2006 Juan Manuel Gimeno Illa\n"
+"Autor Actual: Copyright (C) 2007 Alberto Montañola Lacort\n"
+"\n"
+"This program is free software; you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation; either version 2 of the License, or (at your option) "
+"any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for "
+"more details.\n"
+"\n"
+
+#: SudokuCommon.py:139
+#, python-format
+msgid "About %s"
+msgstr "Sobre %s"
+
+#~ msgid "Test"
+#~ msgstr "Prova?"

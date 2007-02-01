@@ -1,0 +1,394 @@
+#
+# $Id$
+#
+#    Copyright (C) 2007 Alberto Montañola Lacort
+#    See the file AUTHORS for more info
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+#    USA.
+#
+#    Please see the file COPYING for the full license.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: $Id$\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-01-29 15:53+0100\n"
+"PO-Revision-Date: 2007-01-10 00:56+0100\n"
+"Last-Translator: Alberto Montañola Lacort <alberto@almlys.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: wxSudoku.py:40
+msgid ""
+"\n"
+"WxPython 2.6 or higher is required to run this application!!!\n"
+"\n"
+"You can get it from http://www.wxpython.org\n"
+"\n"
+"Or you can just type as root \"apt-get install python-wxgtk2.6\" on Debian, "
+"Ubuntu and any other Debian based distros\n"
+"On other distros you may try similar commands, yum, urpmi, emerge,..., just "
+"check your Distro documentation\n"
+"but if you don't have root access you will need to manually install wxPython "
+"in your home directory, have fun!\n"
+msgstr ""
+
+#: wxSudoku.py:298
+msgid "Creates a New Sudoku"
+msgstr ""
+
+#: wxSudoku.py:298
+msgid "Opens a Sudoku"
+msgstr ""
+
+#: wxSudoku.py:299
+msgid "Opens a Sudoku from a Web server"
+msgstr ""
+
+#: wxSudoku.py:300
+msgid "Saves a Sudoku"
+msgstr ""
+
+#: wxSudoku.py:300
+msgid "The application terminates"
+msgstr ""
+
+#: wxSudoku.py:301
+msgid "Solves the Sudoku (I thought that you were smart!)"
+msgstr ""
+
+#: wxSudoku.py:302
+msgid "Goes back to the past, well, it undoes your latest mess"
+msgstr ""
+
+#: wxSudoku.py:303
+msgid "Redoes your latest undo"
+msgstr ""
+
+#: wxSudoku.py:304
+msgid "It shows you some helpful information"
+msgstr ""
+
+#: wxSudoku.py:305
+#, python-format
+msgid "Changes your app language to %s"
+msgstr ""
+
+#: wxSudoku.py:306
+msgid "It allows you to change the language"
+msgstr ""
+
+#: wxSudoku.py:307
+msgid "Shows some documentation of how does work this thing"
+msgstr ""
+
+#: wxSudoku.py:308
+msgid "Checks if you are running the latest version"
+msgstr ""
+
+#: wxSudoku.py:309
+msgid "I need to explain what does this thing do?"
+msgstr ""
+
+#: wxSudoku.py:310
+msgid "Opens a Python Interactive console, It's that cool"
+msgstr ""
+
+#: wxSudoku.py:344
+msgid "&New..."
+msgstr ""
+
+#: wxSudoku.py:349
+msgid "&Open..."
+msgstr ""
+
+#: wxSudoku.py:354
+msgid "&Open URL..."
+msgstr ""
+
+#: wxSudoku.py:366
+msgid "&Exit"
+msgstr ""
+
+#: wxSudoku.py:371
+msgid "&File"
+msgstr ""
+
+#: wxSudoku.py:375
+msgid "&Solve"
+msgstr ""
+
+#: wxSudoku.py:381
+msgid "&Undo"
+msgstr ""
+
+#: wxSudoku.py:387
+msgid "&Redo"
+msgstr ""
+
+#: wxSudoku.py:393
+msgid "&Sudoku"
+msgstr ""
+
+#: wxSudoku.py:397
+msgid "&Show Hints"
+msgstr ""
+
+#: wxSudoku.py:416
+msgid "&Change Language"
+msgstr ""
+
+#: wxSudoku.py:417
+msgid "&Options"
+msgstr ""
+
+#: wxSudoku.py:433
+msgid "&Console..."
+msgstr ""
+
+#: wxSudoku.py:439
+msgid "&About..."
+msgstr ""
+
+#: wxSudoku.py:443
+msgid "&Help"
+msgstr ""
+
+#: wxSudoku.py:453 tkSudoku.py:269
+msgid "New..."
+msgstr ""
+
+#: wxSudoku.py:455 tkSudoku.py:270
+msgid "Open..."
+msgstr ""
+
+#: wxSudoku.py:460 tkSudoku.py:278 tkSudoku.py:327
+msgid "Solve"
+msgstr ""
+
+#: wxSudoku.py:463 tkSudoku.py:280 tkSudoku.py:331
+msgid "Undo"
+msgstr ""
+
+#: wxSudoku.py:467 tkSudoku.py:281 tkSudoku.py:336
+msgid "Redo"
+msgstr ""
+
+#: wxSudoku.py:472 tkSudoku.py:285 tkSudoku.py:342
+msgid "Show Hints"
+msgstr ""
+
+#: wxSudoku.py:515 tkSudoku.py:386
+msgid "Are you really sure that you wish to quit?"
+msgstr ""
+
+#: wxSudoku.py:516 tkSudoku.py:385
+msgid "Are you sure?"
+msgstr ""
+
+#: wxSudoku.py:535 wxNewSudokuDialog.py:38 wxNewSudokuDialog.py:100
+msgid "Samurai"
+msgstr ""
+
+#: wxSudoku.py:539
+msgid "Creating Sudoku, please wait...."
+msgstr ""
+
+#: wxSudoku.py:548 tkSudoku.py:396
+msgid "GPE files"
+msgstr ""
+
+#: wxSudoku.py:549 tkSudoku.py:397
+msgid "TSudoku files"
+msgstr ""
+
+#: wxSudoku.py:550 tkSudoku.py:398
+msgid "All Files"
+msgstr ""
+
+#: wxSudoku.py:554 wxSudoku.py:574 tkSudoku.py:400 tkSudoku.py:420
+#, python-format
+msgid "Opening %s, please wait..."
+msgstr ""
+
+#: wxSudoku.py:561 wxSudoku.py:565 wxSudoku.py:589 wxSudoku.py:599
+#: tkSudoku.py:407 tkSudoku.py:435
+msgid "Invalid sudoku file"
+msgstr ""
+
+#: wxSudoku.py:564 wxSudoku.py:598 tkSudoku.py:411 tkSudoku.py:444
+#, python-format
+msgid ""
+"Malformed, unconsistent, or unexistent file.\n"
+"%s"
+msgstr ""
+
+#: wxSudoku.py:571 tkSudoku.py:417
+msgid "Enter the URL"
+msgstr ""
+
+#: wxSudoku.py:592 tkSudoku.py:437
+#, python-format
+msgid ""
+"The server said:\n"
+"%s\n"
+"Requesting the %s resource"
+msgstr ""
+
+#: wxSudoku.py:593 tkSudoku.py:438
+msgid "Remote server error"
+msgstr ""
+
+#: wxSudoku.py:596 tkSudoku.py:440
+#, python-format
+msgid "Cannot open %s, reason %s"
+msgstr ""
+
+#: wxSudoku.py:606 tkSudoku.py:449
+msgid "Solving Sudoku, please wait...."
+msgstr ""
+
+#: wxSudoku.py:610 tkSudoku.py:458
+msgid "No solution has been found."
+msgstr ""
+
+#: wxSudoku.py:651
+msgid "Launching Shell..."
+msgstr ""
+
+#: wxSudoku.py:657
+#, python-format
+msgid "Failed launching shell, reason %s"
+msgstr ""
+
+#: tkSudoku.py:268
+msgid "File"
+msgstr ""
+
+#: tkSudoku.py:271
+msgid "Open URL..."
+msgstr ""
+
+#: tkSudoku.py:274
+msgid "Exit"
+msgstr ""
+
+#: tkSudoku.py:277
+msgid "Sudoku"
+msgstr ""
+
+#: tkSudoku.py:284
+msgid "Options"
+msgstr ""
+
+#: tkSudoku.py:288
+msgid "Change Language"
+msgstr ""
+
+#: tkSudoku.py:299
+msgid "Help"
+msgstr ""
+
+#: tkSudoku.py:303
+msgid "About..."
+msgstr ""
+
+#: tkSudoku.py:323
+msgid "Load"
+msgstr ""
+
+#: BaseApp.py:115
+msgid "English"
+msgstr ""
+
+#: BaseApp.py:115
+msgid "Spanish"
+msgstr ""
+
+#: BaseApp.py:115
+msgid "Catalan"
+msgstr ""
+
+#: wxNewSudokuDialog.py:37
+msgid "Type"
+msgstr ""
+
+#: wxNewSudokuDialog.py:38
+msgid "Normal"
+msgstr ""
+
+#: wxNewSudokuDialog.py:39
+msgid "Block Size"
+msgstr ""
+
+#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+msgid "2"
+msgstr ""
+
+#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+msgid "3"
+msgstr ""
+
+#: wxNewSudokuDialog.py:40 wxNewSudokuDialog.py:42
+msgid "4"
+msgstr ""
+
+#: wxNewSudokuDialog.py:41
+msgid "X"
+msgstr ""
+
+#: wxNewSudokuDialog.py:43
+msgid "&Ok"
+msgstr ""
+
+#: wxNewSudokuDialog.py:44
+msgid "&Cancel"
+msgstr ""
+
+#: wxNewSudokuDialog.py:57
+msgid "Create New Sudoku"
+msgstr ""
+
+#: SudokuCommon.py:119
+#, python-format
+msgid ""
+"\n"
+"Al's WxWidgets Python Sudoku.\n"
+"Another Sudoku solver, written 100%% in Python and wxWidgets.\n"
+"\n"
+"Version: %s\n"
+"\n"
+"Original Author: Copyright (c) 2006 Juan Manuel Gimeno Illa\n"
+"Current Author: Copyright (C) 2007 Alberto Montañola Lacort\n"
+"\n"
+"This program is free software; you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation; either version 2 of the License, or (at your option) "
+"any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for "
+"more details.\n"
+"\n"
+msgstr ""
+
+#: SudokuCommon.py:139
+#, python-format
+msgid "About %s"
+msgstr ""
