@@ -24,6 +24,8 @@
 #    Please see the file COPYING for the full license.
 #
 
+""" Threaded solver class """
+
 from threading import Thread
 from SudokuSolver import Solver
 

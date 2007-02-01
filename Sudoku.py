@@ -25,9 +25,9 @@
 #    Please see the file COPYING for the full license.
 #
 # -----------------------------------------------------------------------------
-# ORIGINAL LICENSE FOR tkSudoku.py - Revision 49 and Revision 52
+# ORIGINAL LICENSE FOR tkSudoku.py - Revision 11 and Revision 12
 #
-# Only the pieces of code submitted under Revisions 49 and 52
+# Only the pieces of code submitted under Revisions 11 and 12
 # are under the next License. The revision numbers may change when the
 # code is moved from the MPL private repository to the projects public
 # one. (Current Address of this file $HeadURL$)
@@ -53,7 +53,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""A Sudoku Solver"""
+"""Sudoku types, Grid, etc"""
 
 try:
     set
@@ -196,6 +196,9 @@ class NormalSudoku(SudokuType):
         
 
 class SamuraiSudoku(NormalSudoku):
+    """
+    Defines a Samurai Sudoku
+    """
 
     def __init__(self,row_blocks=3,col_blocks=3,rows_per_block=3,cols_per_block=3):
         self.r=row_blocks*2+1
@@ -208,6 +211,9 @@ class SamuraiSudoku(NormalSudoku):
             raise NotImplemented, "Only 3x3 Samurai Sudokus are currently suported, sorry :("
 
     def getSudokuId(self,idx):
+        """
+        Determines in wich sudoku we are
+        """
         nrt=self.r*self.sbr
         nct=self.c*self.sbc
         mcol=(nct-self.sbc)/2

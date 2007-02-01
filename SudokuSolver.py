@@ -25,9 +25,9 @@
 #    Please see the file COPYING for the full license.
 #
 # -----------------------------------------------------------------------------
-# ORIGINAL LICENSE FOR tkSudoku.py - Revision 49 and Revision 52
+# ORIGINAL LICENSE FOR tkSudoku.py - Revision 11 and Revision 12
 #
-# Only the pieces of code submitted under Revisions 49 and 52
+# Only the pieces of code submitted under Revisions 11 and 12
 # are under the next License. The revision numbers may change when the
 # code is moved from the MPL private repository to the projects public
 # one. (Current Address of this file $HeadURL$)
@@ -68,11 +68,13 @@ class Solver(object):
             self.startup_grid=None
 
     def setGrid(self,grid):
+        """ Sets the working grid """
         self.startup_grid=Sudoku.Grid(grid)
         self.stack=[deepcopy(self.startup_grid),]
         self.solution=None
 
     def step(self):
+        """ Steps the solver """
         try:
             current = self.stack.pop()
             try:
@@ -92,9 +94,11 @@ class Solver(object):
         return False
 
     def isFinished(self):
+        """ Returns true when it's finished """
         return self.solution!=None or len(self.stack)==0
 
     def solve(self):
+        """ Does what the function name says """
         while not len(self.stack) == 0:
             if self.step():
                 return self.solution

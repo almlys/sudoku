@@ -24,6 +24,8 @@
 #    Please see the file COPYING for the full license.
 #
 
+""" XML to class """
+
 import xml.parsers.expat as xmlp
 
 class pnode(object):

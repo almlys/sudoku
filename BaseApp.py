@@ -24,6 +24,8 @@
 #    Please see the file COPYING for the full license.
 #
 
+""" Base Application Classes """
+
 import ConfigParser
 
 class MyConfigParser(ConfigParser.SafeConfigParser):
@@ -62,12 +64,16 @@ class BaseApplication(object):
     """
 
     def __init__(self,config=None):
+        """@param config Configuration file"""
         self.__configFile=config
         self.config=None
         self._loadConfig()
 
     def _loadConfig(self,cfg=None):
-        """Load App configuration"""
+        """
+        Load App configuration
+        @param cfg Configuration file
+        """
         if cfg==None:
             cfg=self.__configFile
         self.config=MyConfigParser()
@@ -83,7 +89,10 @@ class BaseApplication(object):
         pass
 
     def _saveConfig(self,cfg=None):
-        """Save App configuration"""
+        """
+        Save App configuration
+        @param cfg configuration file
+        """
         if cfg==None:
             cfg=self.__configFile
         if cfg!=None:
@@ -105,6 +114,7 @@ class BaseApplication(object):
                                 (lang,)).install(True)
 
     def GetLanguages(self):
+        """Gets all avaliable languages"""
         try:
             return self.__Languages
         except:
@@ -114,6 +124,7 @@ class BaseApplication(object):
             _ = lambda x : x
             LangDict={"en":_("English"),"es":_("Spanish"),"ca":_("Catalan")}
             for lan in dircache.listdir(self.GetCfg("global","app.gettext.locales")):
+                if lan.startswith("."): continue
                 if lan in LangDict:
                     self.__Languages[lan]=LangDict[lan]
                 else:
@@ -121,12 +132,19 @@ class BaseApplication(object):
             return self.__Languages
 
     def SetLanguage(self,lang):
+        """
+        Sets the app language
+        @param lang Language
+        """
         #import locale
         #locale.setlocale(locale.LC_ALL, (lang,"utf-8"))
         self.__Language=lang
         self._installGettext(lang)
 
     def GetLanguage(self):
+        """
+        Gets the current language
+        """
         try:
             return self.__Language
         except:
@@ -135,6 +153,9 @@ class BaseApplication(object):
             return self.__Language
 
     def GetAppVersion(self):
+        """
+        Return app Revision
+        """
         return "$Id$"
 
 

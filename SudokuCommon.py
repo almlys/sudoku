@@ -25,6 +25,8 @@
 #    Please see the file COPYING for the full license.
 #
 
+""" Common Sudoku Stuff, Glue with the model """
+
 import BaseApp
 import Sudoku
 import observer

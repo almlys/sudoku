@@ -24,7 +24,8 @@
 #    Please see the file COPYING for the full license.
 #
 
-# logger class
+""" logger class """
+
 class mlog(object):
     def __init__(self,handle,filename,mode="w"):
         self.file=file(filename,mode)
