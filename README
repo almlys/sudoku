@@ -1,0 +1,35 @@
+=== Sudoku Solver ===
+
+= Requeriments =
+
+* Any OS capable of Running Python 2.4 or Higher. (http://www.python.org)
+* WxPython 2.6 (http://www.wxpython.org)
+
+Check your Distribution for availble packages.
+
+= Install =
+Copy were you want it
+
+= Run =
+
+$ cd $SUDOKUDIR
+
+For the Tkinter version
+$ ./tkSudoku.py
+
+For the wxPython version
+$ ./wxSudoku.py
+
+= Comments, bugs, complaints,  patches, spam, eggs,  etc... =
+
+Al's Sudoku Project home page: http://sudoku.almlys.org
+Author's E-mail address: alberto+sudoku@almlys.org
+
+= Latest version avaliable at =
+
+svn co https://sudoku.almlys.org/svn/sudoku/trunk
+
+Username: cvsguest
+There is no password, just type enter
+
+
